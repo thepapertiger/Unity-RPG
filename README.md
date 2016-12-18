@@ -1,11 +1,14 @@
 # Unity-RPG
-RPG group of Gamespawn club at UCR
+by the RPG group of Gamespawn club at UCR
 
-Coding style is subject to change based on group feedback.
+This project is a basic 2D rpg video game.
 
-Created using Unity 5.5
+
+#Notes:
+*Coding style is subject to change based on group feedback.
+*Created using Unity 5.5
 
 #TO OPEN:
 1) In Unity, choose "Open Project"
 2) Select the folder "Unity_RPG_Project"
-3) choose "Open"
+3) choose "Select Folder"
