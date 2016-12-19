@@ -1,4 +1,10 @@
-﻿using System.Collections;
+﻿/* MovingObject.cs
+ * AUTHOR: Shinlynn Kuo, Yu-Che Cheng (Jeffrey), Hamza Awad, Emmilio Segovia
+ * DESCRIPTION: This is the PLayer's script
+ * REQUIREMENTS: None
+ */
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -6,24 +12,25 @@ using UnityEngine.SceneManagement;
 public class Player : MovingObject {
 	
 	private Animator animator;
-	private int maxHP; //set playerHP <= maxHP when healing
-	private int playerHP; //current hp for scene
+	private int max_hp; //set player_hp <= max_hp when healing
+	private int player_hp; //current hp for scene
+	private int player_attack_damage; //current_attack_damage for the scene
 
 	// Use this for initialization
 	protected override void Start () { //overrides the MovingObject's Start function
 		animator = GetComponent<Animator>();
-		playerHP = GameManager.instance.savedPlayerHP;
+		player_hp = StatsManager.instance.player_hp;
 		base.Start ();
 	}
 
 	//called when the player is disabled (at the end of the current scene
 	void onDisable () {
-		GameManager.instance.savedPlayerHP = playerHP;
+		StatsManager.instance.player_hp = player_hp;
 	}
 
 	// Update is called once per frame
 	void Update () {
-		if (!GameManager.instance.playersTurn)
+		if (!GameManager.instance.players_turn)
 			return;
 
 		int horizontal = 0;
@@ -52,22 +59,40 @@ public class Player : MovingObject {
 		}
 	}
 
-	protected override void AttemptMove <T> (int xDir, int yDir) {
-		base.AttemptMove<T> (xDir, yDir);
+	/// <summary>
+	/// This overrides class MovingObject's AttemptMove function which attempt to move the caller
+	/// </summary>
+	/// <param name="x_dir">X dir.</param>
+	/// <param name="y_dir">Y dir.</param>
+	/// <typeparam name="T">The 1st type parameter.</typeparam>
+	protected override void AttemptMove <T> (int x_dir, int y_dir) {
+		base.AttemptMove<T> (x_dir, y_dir);
 		CheckIfGameOver ();
-		GameManager.instance.playersTurn = false;
+		GameManager.instance.players_turn = false;
 	}
 
-	private void OnTriggerEnter2D (Collider2D collidee) {
-		//TODO: this is for entering doors to trigger a scene changeS
-	}
-
+	/// <summary>
+	/// This overrides MovingObject's function. It is called if the caller cannot move as attempted
+	/// </summary>
+	/// <param name="component">Component.</param>
+	/// <typeparam name="T">The 1st type parameter.</typeparam>
 	protected override void OnCantMove<T> (T component) {
 		//TODO: define what the player does when run into a blocking object
 	}
 
+	/// <summary>
+	/// This is called when the mover runs into a trigger
+	/// </summary>
+	/// <param name="collidee">Collidee.</param>
+	private void OnTriggerEnter2D (Collider2D collidee) {
+		//TODO: this is for entering doors to trigger a scene changeS
+	}
+
+	/// <summary>
+	/// Checks if the player has died to end the game.
+	/// </summary>
 	private void CheckIfGameOver () {
-		if (playerHP <= 0)
+		if (player_hp <= 0)
 			GameManager.instance.GameOver();
 	}
 

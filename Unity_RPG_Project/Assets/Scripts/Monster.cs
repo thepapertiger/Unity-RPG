@@ -1,6 +1,8 @@
-﻿/*
- * I created this placeholder so GameManager can compile
-*/
+﻿/* Monster.cs
+ * AUTHOR: Shinlynn Kuo, Yu-Che Cheng (Jeffrey), Hamza Awad, Emmilio Segovia
+ * DESCRIPTION: This is a place holder so that the Game Manager can compile.
+ * REQUIREMENTS: None
+ */
 
 using System.Collections;
 using System.Collections.Generic;
