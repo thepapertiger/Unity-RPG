@@ -2,6 +2,7 @@
  * AUTHOR: Shinlynn Kuo, Yu-Che Cheng (Jeffrey), Hamza Awad, Emmilio Segovia
  * DESCRIPTION: The Game Manager that is always open and manages the flow of the game as it is played.
  * 				It is not destroyed when new levels and scenes are loaded.
+ *	 			It derives from  singleton.
  * REQUIREMENTS: None
  */
 
@@ -9,9 +10,11 @@ using System.Collections;
 using System.Collections.Generic; //for lists
 using UnityEngine;
 
-public class GameManager : MonoBehaviour {
+public class GameManager : Singleton<GameManager> {
+
+	protected GameManager () {} //constructor cannot be used - is null
+
 	//publics to be defined in editor
-	public static GameManager instance = null; //the static variable for singleton pattern
 	public float turn_delay = 0.1f; //time between "turns" in realworld for movements
 	[HideInInspector] public bool players_turn = true; //player moves before monsters
 
@@ -20,13 +23,6 @@ public class GameManager : MonoBehaviour {
 
 	//called on initialization
 	void Awake () {
-		//singleton pattern to ensure only one GameManager
-		if (instance == null)
-			instance = this;
-		else
-			Destroy (gameObject);
-		
-		DontDestroyOnLoad (gameObject); //The GameManager should always exist across scenes
 		monsters = new List<Monster> ();
 	}
 

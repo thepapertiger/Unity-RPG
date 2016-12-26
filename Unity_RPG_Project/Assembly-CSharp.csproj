@@ -46,14 +46,35 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\CameraController.cs" />
      <Compile Include="Assets\Scripts\GameManager.cs" />
-     <Compile Include="Assets\Scripts\Loader.cs" />
      <Compile Include="Assets\Scripts\Monster.cs" />
      <Compile Include="Assets\Scripts\MovingObject.cs" />
      <Compile Include="Assets\Scripts\Player.cs" />
+     <Compile Include="Assets\Scripts\Singleton.cs" />
+     <Compile Include="Assets\Scripts\Stats.cs" />
      <Compile Include="Assets\Scripts\StatsManager.cs" />
      <Compile Include="Assets\TESTING.cs" />
+     <Compile Include="Assets\Tiled2Unity\Scripts\Runtime\ImportBehaviour.cs" />
+     <Compile Include="Assets\Tiled2Unity\Scripts\Runtime\SortingLayerExposed.cs" />
+     <Compile Include="Assets\Tiled2Unity\Scripts\Runtime\SpriteDepthInMap.cs" />
+     <Compile Include="Assets\Tiled2Unity\Scripts\Runtime\TileAnimator.cs" />
+     <Compile Include="Assets\Tiled2Unity\Scripts\Runtime\TiledInitialShaderProperties.cs" />
+     <Compile Include="Assets\Tiled2Unity\Scripts\Runtime\TiledMap.cs" />
+     <None Include="Assets\Tiled2Unity\Shaders\shaDefault.shader" />
+     <None Include="Assets\Tiled2Unity\Prefabs\_ReadMe.txt" />
+     <None Include="Assets\Tiled2Unity\Shaders\shaTiledMap.shader" />
+     <None Include="Assets\Tiled2Unity\Tiled2Unity.export.txt" />
+     <None Include="Assets\Tiled2Unity\Shaders\shaDepth.shader" />
+     <None Include="Assets\Tiled2Unity\Materials\_ReadMe.txt" />
+     <None Include="Assets\Tiled2Unity\Textures\_ReadMe.txt" />
      <None Include="Assets\ActRPGsprites\readme.txt" />
+     <None Include="Assets\Tiled2Unity\Imported\WinterCliffW-Dungeon.tiled2unity.xml" />
+     <None Include="Assets\Tiled2Unity\Shaders\shaColorKey.shader" />
+     <None Include="Assets\Tiled2Unity\Shaders\shaDepthColorKey.shader" />
+     <None Include="Assets\Tiled2Unity\License.txt" />
+     <None Include="Assets\Tiled2Unity\Imported\_ReadMe.txt" />
+     <None Include="Assets\Tiled2Unity\Meshes\_ReadMe.txt" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

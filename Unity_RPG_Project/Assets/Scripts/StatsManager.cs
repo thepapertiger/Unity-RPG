@@ -2,6 +2,7 @@
  * AUTHOR: Shinlynn Kuo, Yu-Che Cheng (Jeffrey), Hamza Awad, Emmilio Segovia
  * DESCRIPTION: The script class keeps track of the player and enemy stats and is not destroyed between loads.
  * 				So enemies and the player in each scene get information from this object.
+ * 				It derives from  singleton.
  * REQUIREMENTS: None
  */
 
@@ -9,30 +10,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StatsManager : MonoBehaviour {
+public class StatsManager : Singleton<StatsManager> {
 
-	public static StatsManager instance = null; //the static variable for singleton pattern
+	protected StatsManager () {} //constructor cannot be used - is null
 
-	//Saved data across scenes
-	public int player_hp;
-	public int player_attack_power;
+	public Stats player_stats;
+	public Stats monster_stats;
 
-	// Use this for initialization
-	void Awake () {
-		//singleton pattern to ensure only one GameManager
-		if (instance == null)
-			instance = this;
-		else
-			Destroy (gameObject);
-
-		DontDestroyOnLoad (gameObject); //The StatsManager should always exist across scenes
-
-		player_hp = 100;
-		player_attack_power = 10;
+	//called on initialization
+	void Awake()
+	{
+		player_stats = GameObject.FindGameObjectWithTag("Player").GetComponent<Stats>();
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+
+	void Update()
+	{
+
 	}
+
 }

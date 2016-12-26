@@ -56,5 +56,10 @@ public class Monster : MovingObject {
     private void DetectPlayer()
     {
 
+<<<<<<< HEAD
     }
+=======
+	}
+
+>>>>>>> ce98d42e47466566a4bb2364e09b67ad1f5545cc
 }
