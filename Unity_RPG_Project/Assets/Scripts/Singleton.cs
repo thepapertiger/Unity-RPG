@@ -29,7 +29,7 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour {
 					instance = (T) FindObjectOfType (typeof(T));
 
 					if (FindObjectsOfType (typeof(T)).Length > 1) { //if there are more than one, error msg
-						Debug.LogError ("[Singlton] There are more than one singleton! " +
+						Debug.LogError ("[Singleton] There are more than one singleton! " +
 							"Try reopening the scene.");
 						return instance;
 					}

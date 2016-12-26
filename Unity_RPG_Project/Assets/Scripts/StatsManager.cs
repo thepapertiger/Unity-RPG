@@ -14,4 +14,17 @@ public class StatsManager : Singleton<StatsManager> {
 
 	protected StatsManager () {} //constructor cannot be used - is null
 
+	public Stats player_stats;
+	public Stats monster_stats;
+
+	//called on initialization
+	void Awake()
+	{
+	}
+
+	void Update()
+	{
+
+	}
+
 }
