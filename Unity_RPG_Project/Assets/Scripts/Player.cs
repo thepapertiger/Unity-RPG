@@ -1,6 +1,7 @@
 ﻿/* MovingObject.cs
  * AUTHOR: Shinlynn Kuo, Yu-Che Cheng (Jeffrey), Hamza Awad, Emmilio Segovia
  * DESCRIPTION: This is the PLayer's script
+ * 				It derives from MovingObject and is a Singleton.
  * REQUIREMENTS: None
  */
 
@@ -10,27 +11,24 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Player : MovingObject {
-	
+
+	protected Player () {} //constructor cannot be used - is null
+
 	private Animator animator;
-	private int max_hp; //set player_hp <= max_hp when healing
+	private int max_hp = 100; //set player_hp <= max_hp when healing
 	private int player_hp; //current hp for scene
-	private int player_attack_damage; //current_attack_damage for the scene
+	private int player_attack_damage = 10; //current_attack_damage for the scene
 
 	// Use this for initialization
 	protected override void Start () { //overrides the MovingObject's Start function
 		animator = GetComponent<Animator>();
-		player_hp = StatsManager.instance.player_hp;
+		player_hp = max_hp;
 		base.Start ();
-	}
-
-	//called when the player is disabled (at the end of the current scene
-	void onDisable () {
-		StatsManager.instance.player_hp = player_hp;
 	}
 
 	// Update is called once per frame
 	void Update () {
-		if (!GameManager.instance.players_turn)
+		if (!GameManager.Instance.players_turn || i_am_moving)
 			return;
 
 		int horizontal = 0;
@@ -54,6 +52,7 @@ public class Player : MovingObject {
 				animator.SetTrigger ("PlayerRight");
 			else if (horizontal < 0 && vertical == 0)
 				animator.SetTrigger ("PlayerLeft");
+
 			//attempt to move with user's input
 			AttemptMove<Monster> (horizontal, vertical);
 		}
@@ -67,8 +66,8 @@ public class Player : MovingObject {
 	/// <typeparam name="T">The 1st type parameter.</typeparam>
 	protected override void AttemptMove <T> (int x_dir, int y_dir) {
 		base.AttemptMove<T> (x_dir, y_dir);
-		CheckIfGameOver ();
-		GameManager.instance.players_turn = false;
+		CheckIfGameOver (); //maybe player ran into damaging object
+		GameManager.Instance.players_turn = false;
 	}
 
 	/// <summary>
@@ -93,7 +92,7 @@ public class Player : MovingObject {
 	/// </summary>
 	private void CheckIfGameOver () {
 		if (player_hp <= 0)
-			GameManager.instance.GameOver();
+			GameManager.Instance.GameOver();
 	}
 
 }

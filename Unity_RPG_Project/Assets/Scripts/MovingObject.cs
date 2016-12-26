@@ -1,10 +1,12 @@
 ﻿/* MovingObject.cs
  * AUTHOR: Shinlynn Kuo, Yu-Che Cheng (Jeffrey), Hamza Awad, Emmilio Segovia
- * DESCRIPTION: This script is the base class for the player, and can be derived
- * 					by all moving objects. It has an AttemptMove() to either move 
+ * DESCRIPTION: 	This is a Singleton therefore, all derived classes will be singleton.
+ * 					It is mainly for function organization for readability.
+ * 					This script is the base class for the player, and can be derived
+ * 					by all SINGLETON moving objects. It has an AttemptMove() to either move 
  * 					up/down/left/right, or call OnCantMove(). The derived class should
  * 					implement a public move function to be called by GameManager which
- * 					calls AttemptMove().
+ * 					calls AttemptMove(). 
  * REQUIREMENTS: None
  */
 
@@ -12,10 +14,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class MovingObject : MonoBehaviour {
+public abstract class MovingObject : Singleton<MovingObject> {
+
+	protected MovingObject () {} //prevents construction
+
 	//these can be adjusted in editor
 	public float move_time = 0.1f;	//rate of movement [seconds]
 	public LayerMask blocking_layer; //the layer that will block moving objects
+
+	protected bool i_am_moving = false;
 
 	private BoxCollider2D box_collider; //reference to this component
 	private Rigidbody2D rigidbody_2d;			//reference to this component
@@ -37,16 +44,17 @@ public abstract class MovingObject : MonoBehaviour {
 	protected bool Move (int x_dir, int y_dir, out RaycastHit2D hit) {
 		Vector2 start = transform.position; //get current position
 		Vector2 end = start + new Vector2 (x_dir, y_dir); //the x_dir/y_dir are user input values 1, 0, or -1
-
+		
 		box_collider.enabled = false; //avoid lincast from hitting this box collider
 		hit = Physics2D.Linecast(start, end, blocking_layer); //see if there is somthing blocking
 		box_collider.enabled = true;  //renable after calculation
-
+        
 		if (hit.transform != null) //onCantMove will be called by the AttemptMove function
 			return false;
 
-		StartCoroutine (SmoothMovement (end));
-		return true;
+        i_am_moving = true; //movement is taking place, to not attempt to move again until done
+        StartCoroutine (SmoothMovement (end));
+        return true;
 	}
 
 	/// <summary>
@@ -66,17 +74,19 @@ public abstract class MovingObject : MonoBehaviour {
 			sqr_remaining_dist = (transform.position - end).sqrMagnitude;
 			yield return null; //wait for a frame before loop reiteration
 		}
+		i_am_moving = false;
 	}
 
 	/// <summary>
-	/// Attempt to move, otherwise call OnCantMove()
+	/// Attempt to move, otherwise call OnCantMove().
+	/// Designed to interact with a single component type.
 	/// </summary>
 	/// <param name="x_dir">X dir.</param>
 	/// <param name="y_dir">Y dir.</param>
 	/// <typeparam name="T">The 1st type parameter.</typeparam>
 	protected virtual void AttemptMove <T> (int x_dir, int y_dir)
 			where T : Component {
-
+	
 		RaycastHit2D hit;
 		bool canMove = Move (x_dir, y_dir, out hit);
 
