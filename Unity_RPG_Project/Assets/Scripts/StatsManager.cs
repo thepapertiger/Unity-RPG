@@ -20,6 +20,7 @@ public class StatsManager : Singleton<StatsManager> {
 	//called on initialization
 	void Awake()
 	{
+		player_stats = GameObject.FindGameObjectWithTag("Player").GetComponent<Stats>();
 	}
 
 	void Update()
