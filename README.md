@@ -1,14 +1,13 @@
 # Unity-RPG
-by the RPG group of Gamespawn club at UCR
-
-This project is a basic 2D rpg video game.
+This project is a basic 2D rpg video game <br />
+by the RPG group of Gamespawn club at UCR.
 
 
 #Notes:
-*Coding style is subject to change based on group feedback.
 *Created using Unity 5.5
+*maps are created using "Tiled" map editor (link: http://www.mapeditor.org/) <br />
 
 #TO OPEN:
-1) In Unity, choose "Open Project"
-2) Select the folder "Unity_RPG_Project"
-3) choose "Select Folder"
+1) In Unity, choose "Open Project" <br />
+2) Select the folder "Unity_RPG_Project" <br />
+3) choose "Select Folder" <br />

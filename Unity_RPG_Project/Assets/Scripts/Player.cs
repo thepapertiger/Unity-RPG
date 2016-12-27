@@ -57,8 +57,8 @@ public class Player : MovingObject {
 			AttemptMove<Monster> (horizontal, vertical);
 
             //If enter is pressed, interact with object in front if possible
-		} else if (Input.GetButtonDown("Return") || Input.GetButtonDown("Enter")) {
-            /*Vector2 start = transform.position;
+		} /*else if (Input.GetButtonDown("Return") || Input.GetButtonDown("Enter")) {
+            Vector2 start = transform.position;
             Vector2 end = start;
             
             boxCollider.enabled = false;
@@ -70,8 +70,8 @@ public class Player : MovingObject {
                 T hitComponent = hit.transform.GetComponent<T>();
                 if (canMove == false && hitComponent != null)
                     OnCantMove(hitComponent);
-            }*/
-        }
+            }
+        }*/
 	}
 
 	/// <summary>
