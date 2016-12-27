@@ -1,8 +1,8 @@
-﻿/* CameraController.cs
- * AUTHOR: Shinlynn Kuo, Yu-Che Cheng (Jeffrey), Hamza Awad, Emmilio Segovia
+﻿/* NAME:            CameraController.cs
+ * AUTHOR:          Shinlynn Kuo, Yu-Che Cheng (Jeffrey), Hamza Awad, Emmilio Segovia
  * DESCRIPTION: 	This scripts simply moves the camera with the player after everything
  * 					else has been calculated.
- * REQUIREMENTS: None
+ * REQUIREMENTS:    None
  */
 
 using System.Collections;

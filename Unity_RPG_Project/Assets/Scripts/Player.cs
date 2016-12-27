@@ -1,8 +1,10 @@
-﻿/* MovingObject.cs
- * AUTHOR: Shinlynn Kuo, Yu-Che Cheng (Jeffrey), Hamza Awad, Emmilio Segovia
- * DESCRIPTION: This is the PLayer's script
- * 				It derives from MovingObject and is a Singleton.
- * REQUIREMENTS: None
+﻿/* NAME:            Player.cs
+ * AUTHOR:          Shinlynn Kuo, Yu-Che Cheng (Jeffrey), Hamza Awad, Emmilio Segovia
+ * DESCRIPTION:     This is the Player's script. It derives from MovingObject and is a Singleton.
+ *                  Singleton pattern is harcoded at the bottom since this class cannot derive
+ *                  from the Singleton base class because it already derives from MovingObject.
+ *                  MovingObject has more implementations so it is best derived.
+ * REQUIREMENTS:    Base class MovingObject.cs must be present.
  */
 
 using System.Collections;
@@ -19,8 +21,11 @@ public class Player : MovingObject {
 	private int player_hp; //current hp for scene
 	private int player_attack_damage = 10; //current_attack_damage for the scene
 
-	// Use this for initialization
-	protected override void Start () { //overrides the MovingObject's Start function
+    private static Player _Instance; //the backing variable for singleton pattern
+    private static object LockObject = new object();
+
+    // Use this for initialization
+    protected override void Start () { //overrides the MovingObject's Start function
 		animator = GetComponent<Animator>();
 		player_hp = max_hp;
 		base.Start ();
@@ -28,13 +33,13 @@ public class Player : MovingObject {
 
 	// Update is called once per frame
 	void Update () {
-		if (!GameManager.Instance.players_turn || i_am_moving)
+		if (!GameManager.Instance.PlayersTurn || IAmMoving)
 			return;
 
 		int horizontal = 0;
 		int vertical = 0;
 
-		//these return 1, 0r, -1 depending on directional arrows0
+		//these return 1, 0, -1 depending on directional arrows0
 		horizontal = (int) Input.GetAxisRaw ("Horizontal");
 		vertical = (int) Input.GetAxisRaw ("Vertical");
 
@@ -77,20 +82,15 @@ public class Player : MovingObject {
 	/// <summary>
 	/// This overrides class MovingObject's AttemptMove function which attempt to move the caller
 	/// </summary>
-	/// <param name="x_dir">X dir.</param>
-	/// <param name="y_dir">Y dir.</param>
-	/// <typeparam name="T">The 1st type parameter.</typeparam>
 	protected override void AttemptMove <T> (int x_dir, int y_dir) {
 		base.AttemptMove<T> (x_dir, y_dir);
 		CheckIfGameOver (); //maybe player ran into damaging object
-		GameManager.Instance.players_turn = false;
+		GameManager.Instance.PlayersTurn = false;
 	}
 
 	/// <summary>
 	/// This overrides MovingObject's function. It is called if the caller cannot move as attempted
 	/// </summary>
-	/// <param name="component">Component.</param>
-	/// <typeparam name="T">The 1st type parameter.</typeparam>
 	protected override void OnCantMove<T> (T component) {
 		//TODO: define what the player does when run into a blocking object
 	}
@@ -98,7 +98,6 @@ public class Player : MovingObject {
 	/// <summary>
 	/// This is called when the mover runs into a trigger
 	/// </summary>
-	/// <param name="collidee">Collidee.</param>
 	private void OnTriggerEnter2D (Collider2D collidee) {
 		//TODO: this is for entering doors to trigger a scene changeS
 	}
@@ -110,5 +109,59 @@ public class Player : MovingObject {
 		if (player_hp <= 0)
 			GameManager.Instance.GameOver();
 	}
+
+    /// <summary>
+	/// This is the property of Instance for the Singleton Pattern.
+	/// </summary>
+    public static Player Instance
+    {
+        get
+        {
+            if (applicationIsQuitting)
+            { //do not create another after application quits
+                Debug.LogWarning("[Singleton] Instance 'Player' " +
+                    "already destroyed on aplication quit.");
+                return null;
+            }
+            lock (LockObject)
+            { //use lock to ensure only one thread is accesing this critical code block
+                if (_Instance == null)
+                {
+
+                    _Instance = (Player)FindObjectOfType(typeof(Player));
+
+                    if (FindObjectsOfType(typeof(Player)).Length > 1)
+                    { //if there are more than one, error msg
+                        Debug.LogError("[Singleton] There are more than one singleton! " +
+                            "Try reopening the scene.");
+                        return _Instance;
+                    }
+
+                    if (_Instance == null)
+                    { //if there are none, create singleton
+                        GameObject singleton = new GameObject();
+                        _Instance = singleton.AddComponent<Player>();
+                        singleton.name = "(singleton) Player";
+
+                        DontDestroyOnLoad(singleton);
+
+                    }
+                }
+
+                return _Instance;
+            }
+        }
+    }
+
+    private static bool applicationIsQuitting = false;
+
+    /// <summary>
+    /// This is to prevent a buggy ghost of the Instance
+    /// after the singleton is destroyed.
+    /// </summary>
+    public void OnDestroy()
+    {
+        applicationIsQuitting = true;
+    }
 
 }

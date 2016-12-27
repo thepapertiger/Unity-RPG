@@ -1,7 +1,7 @@
-﻿/* Monster.cs
- * AUTHOR: Shinlynn Kuo, Yu-Che Cheng (Jeffrey), Hamza Awad, Emmilio Segovia
- * DESCRIPTION: This is a place holder so that the Game Manager can compile.
- * REQUIREMENTS: None
+﻿/* NAME:            Monster.cs
+ * AUTHOR:          Shinlynn Kuo, Yu-Che Cheng (Jeffrey), Hamza Awad, Emmilio Segovia
+ * DESCRIPTION:     This is a place holder so that the Game Manager can compile.
+ * REQUIREMENTS:    Base class MovingObject.cs must be present.
  */
 
 using System.Collections;
@@ -10,9 +10,9 @@ using UnityEngine;
 
 public class Monster : MovingObject {
    
-    private Animator animator_monster;
-    private GameObject player;
-    private Transform target;
+    private Animator AnimatorMonster;
+    private GameObject Player;
+    private Transform Target;
 
 	// Use this for initialization
 	protected override void Start () {
@@ -21,8 +21,8 @@ public class Monster : MovingObject {
 		GameManager.AddMonsterToList (Monster this); 
 		*/
         GameManager.Instance.AddMonsterToList(this); //add monsters to GameManager's list
-        player = GameObject.FindGameObjectWithTag("Player").gameObject;
-        animator_monster = GetComponent<Animator>();
+        Player = GameObject.FindGameObjectWithTag("Player").gameObject;
+        AnimatorMonster = GetComponent<Animator>();
         base.Start();
     }
 
@@ -32,11 +32,17 @@ public class Monster : MovingObject {
 
     }
 
-    protected override void AttemptMove<T>(int xDir, int yDir)
+    /// <summary>
+    /// Attempts to move in the direction (x_dir, y_dir)
+    /// </summary>
+    protected override void AttemptMove<T>(int x_dir, int y_dir)
     {
-        base.AttemptMove<T>(xDir, yDir);
+        base.AttemptMove<T>(x_dir, y_dir);
     }
 
+    /// <summary>
+    /// Called on when the monster enters a collision
+    /// </summary>
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Player")
@@ -46,6 +52,9 @@ public class Monster : MovingObject {
         }
     }
 
+    /// <summary>
+    /// Called if the Monster cannot move
+    /// </summary>
     protected override void OnCantMove<T>(T component)
     {
         //TODO: define what the monster does when run into a blocking object
@@ -60,26 +69,26 @@ public class Monster : MovingObject {
     private void DetectPlayer()
     {
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 1f, 1 << LayerMask.NameToLayer("Player"));
-        int xDir = 0;
-        int yDir = 0;
+        int x_dir = 0;
+        int y_dir = 0;
         //If the difference in positions is approximately zero (Epsilon) do the following:
-        if (Mathf.Abs(target.position.x - transform.position.x) < float.Epsilon)
+        if (Mathf.Abs(Target.position.x - transform.position.x) < float.Epsilon)
         {
             //If the y coordinate of the target's (player) position is greater than the y coordinate of this enemy's position set y direction 1 (to move up). If not, set it to -1 (to move down).
-            yDir = target.position.y > transform.position.y ? 1 : -1;
+            y_dir = Target.position.y > transform.position.y ? 1 : -1;
         }
         //If the difference in positions is not approximately zero (Epsilon) do the following:
         else
         {
             //Check if target x position is greater than enemy's x position, if so set x direction to 1 (move right), if not set to -1 (move left).
-            xDir = target.position.x > transform.position.x ? 1 : -1;
+            x_dir = Target.position.x > transform.position.x ? 1 : -1;
         }
 
         for (int i = 0; i < colliders.Length; i++)
         {
             if(colliders[i].gameObject.tag == "Player")
             {
-                AttemptMove<Player>(xDir, yDir);
+                AttemptMove<Player>(x_dir, y_dir);
             }
         }
     }
