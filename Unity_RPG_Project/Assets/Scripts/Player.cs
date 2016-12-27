@@ -41,7 +41,7 @@ public class Player : MovingObject {
 		if (horizontal != 0) //go horzontal only for diagonal input
 			vertical = 0;
 
-		//execute the following only if user input
+		//execute the following only if directional input
 		if (horizontal != 0 || vertical != 0) {
 			//determine which direction to show the sprite
 			if (horizontal == 0 && vertical > 0)
@@ -55,7 +55,23 @@ public class Player : MovingObject {
 
 			//attempt to move with user's input
 			AttemptMove<Monster> (horizontal, vertical);
-		}
+
+            //If enter is pressed, interact with object in front if possible
+		} else if (Input.GetButtonDown("Return") || Input.GetButtonDown("Enter")) {
+            /*Vector2 start = transform.position;
+            Vector2 end = start;
+            
+            boxCollider.enabled = false;
+            RaycastHit2D hit = Physics2D.Linecast(start, end, blockingLayer);
+            boxCollider.enabled = true;
+
+            if (hit.transform != null)
+            {
+                T hitComponent = hit.transform.GetComponent<T>();
+                if (canMove == false && hitComponent != null)
+                    OnCantMove(hitComponent);
+            }*/
+        }
 	}
 
 	/// <summary>

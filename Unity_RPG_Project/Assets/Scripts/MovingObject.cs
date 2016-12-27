@@ -23,8 +23,8 @@ public abstract class MovingObject : Singleton<MovingObject> {
 	public LayerMask blocking_layer; //the layer that will block moving objects
 
 	protected bool i_am_moving = false;
+	protected BoxCollider2D box_collider; //reference to this component
 
-	private BoxCollider2D box_collider; //reference to this component
 	private Rigidbody2D rigidbody_2d;			//reference to this component
 	private float inverse_move_time;		//so division is done once [1/seconds]
 
