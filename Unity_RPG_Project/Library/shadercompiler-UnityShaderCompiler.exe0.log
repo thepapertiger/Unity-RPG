@@ -1,2 +1,16 @@
 Base path: C:/Program Files/Unity/Editor/Data
 Cmd: getPlatforms
+Cmd: preprocess
+  insize=2575 outsize=903 ok=1
+Cmd: preprocess
+  insize=1928 outsize=711 ok=1
+Cmd: preprocess
+  insize=1525 outsize=620 ok=1
+Cmd: preprocess
+  insize=2451 outsize=784 ok=1
+Cmd: preprocess
+  insize=1766 outsize=649 ok=1
+Cmd: compileSnippet
+  api=4 type=0 insize=1517 outsize=666 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA ok=1
+Cmd: compileSnippet
+  api=4 type=1 insize=1517 outsize=666 kw= pd=UNITY_ENABLE_REFLECTION_BUFFERS UNITY_PBS_USE_BRDF1 UNITY_SPECCUBE_BOX_PROJECTION UNITY_SPECCUBE_BLENDING SHADER_API_DESKTOP UNITY_COLORSPACE_GAMMA ok=1
