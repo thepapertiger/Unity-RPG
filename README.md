@@ -4,7 +4,7 @@ by the RPG group of Gamespawn club at UCR.
 
 
 #Notes:
-*Created using Unity 5.5
+*Created using Unity 5.5 <br />
 *maps are created using "Tiled" map editor (link: http://www.mapeditor.org/) <br />
 
 #TO OPEN:
