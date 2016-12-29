@@ -10,7 +10,9 @@ using UnityEngine;
 
 public class Monster : MovingObject {
    
-    private Animator AnimatorMonster;
+	public Stats MonsterStats;
+
+	private Animator AnimatorMonster;
     private GameObject Player;
     private Transform Target;
 
@@ -23,6 +25,7 @@ public class Monster : MovingObject {
         GameManager.Instance.AddMonsterToList(this); //add monsters to GameManager's list
         Player = GameObject.FindGameObjectWithTag("Player").gameObject;
         AnimatorMonster = GetComponent<Animator>();
+		MonsterStats = new Stats ("Monster", 1, 50, 0, 5);
         base.Start();
     }
 
