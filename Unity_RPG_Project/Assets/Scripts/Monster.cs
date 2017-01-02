@@ -10,7 +10,7 @@ using UnityEngine;
 
 public class Monster : MovingObject {
    
-	public Stats MonsterStats;
+	//public Stats MonsterStats;
 
 	private Animator AnimatorMonster;
     private GameObject Player;
@@ -20,7 +20,7 @@ public class Monster : MovingObject {
 	protected override void Start () {
         Player = GameObject.FindGameObjectWithTag("Player").gameObject;
         AnimatorMonster = GetComponent<Animator>();
-		MonsterStats = new Stats ("Monster", 1, 50, 0, 5);
+		//MonsterStats = new Stats ("Monster", 1, 50, 0, 5, 5);
         base.Start();
     }
 

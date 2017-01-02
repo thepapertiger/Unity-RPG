@@ -22,9 +22,10 @@ public class Player : MovingObject
     protected Player() { } //constructor cannot be used - is null
 
     private Animator animator;
-    private int MaxHP = 100; //set PlayerHP <= MaxHP when healing
-    private int PlayerHP; //current hp for scene
-    private int PlayerAttackDamage = 10; //current_attack_damage for the scene
+	private Stats player_stats;
+    //private int MaxHP = 100; //set PlayerHP <= MaxHP when healing
+    //private int PlayerHP; //current hp for scene
+    //private int PlayerAttackDamage = 10; //current_attack_damage for the scene
 
     private Vector2 Front;
     private static Player BackingInstance; //the backing variable for singleton pattern
@@ -34,7 +35,8 @@ public class Player : MovingObject
     protected override void Start()
     { //overrides the MovingObject's Start function
         animator = GetComponent<Animator>();
-        PlayerHP = MaxHP;
+		player_stats = GetComponent<Stats> ();
+        //PlayerHP = MaxHP;
         Front = Vector2.down;
         base.Start();
     }
@@ -137,7 +139,7 @@ public class Player : MovingObject
     /// </summary>
     private void CheckIfGameOver()
     {
-        if (PlayerHP <= 0)
+		if (player_stats.HP <= 0)
             GameManager.Instance.GameOver();
     }
 
