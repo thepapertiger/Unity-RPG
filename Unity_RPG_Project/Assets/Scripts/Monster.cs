@@ -18,11 +18,6 @@ public class Monster : MovingObject {
 
 	// Use this for initialization
 	protected override void Start () {
-        /*
-	//the Monsters can add themselves to the GameManager's list by calling:
-		GameManager.AddMonsterToList (Monster this); 
-		*/
-        GameManager.Instance.AddMonsterToList(this); //add monsters to GameManager's list
         Player = GameObject.FindGameObjectWithTag("Player").gameObject;
         AnimatorMonster = GetComponent<Animator>();
 		MonsterStats = new Stats ("Monster", 1, 50, 0, 5);

@@ -4,6 +4,8 @@
  *                  Singleton pattern is harcoded at the bottom since this class cannot derive
  *                  from the Singleton base class because it already derives from MovingObject.
  *                  MovingObject has more implementations so it is best derived.
+ *                  The player is truly the manager of the entire game's state, since the game 
+ *                  responds to the player's actions.
  * REQUIREMENTS:    Base class MovingObject.cs must be present.
  */
 
@@ -12,103 +14,132 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Player : MovingObject {
+public class Player : MovingObject
+{
 
-	protected Player () {} //constructor cannot be used - is null
+    public bool PlayersTurn = true;
 
-	private Animator animator;
-	private int max_hp = 100; //set player_hp <= max_hp when healing
-	private int player_hp; //current hp for scene
-	private int player_attack_damage = 10; //current_attack_damage for the scene
+    protected Player() { } //constructor cannot be used - is null
 
-    private static Player _Instance; //the backing variable for singleton pattern
+    private Animator animator;
+    private int MaxHP = 100; //set PlayerHP <= MaxHP when healing
+    private int PlayerHP; //current hp for scene
+    private int PlayerAttackDamage = 10; //current_attack_damage for the scene
+
+    private Vector2 Front;
+    private static Player BackingInstance; //the backing variable for singleton pattern
     private static object LockObject = new object();
 
     // Use this for initialization
-    protected override void Start () { //overrides the MovingObject's Start function
-		animator = GetComponent<Animator>();
-		player_hp = max_hp;
-		base.Start ();
-	}
+    protected override void Start()
+    { //overrides the MovingObject's Start function
+        animator = GetComponent<Animator>();
+        PlayerHP = MaxHP;
+        Front = Vector2.down;
+        base.Start();
+    }
 
-	// Update is called once per frame
-	void Update () {
-		if (!GameManager.Instance.PlayersTurn || IAmMoving)
-			return;
+    // Update is called once per frame
+    void Update()
+    {
 
-		int horizontal = 0;
-		int vertical = 0;
+        if (!PlayersTurn || IAmMoving)
+            return;
 
-		//these return 1, 0, -1 depending on directional arrows0
-		horizontal = (int) Input.GetAxisRaw ("Horizontal");
-		vertical = (int) Input.GetAxisRaw ("Vertical");
+        int horizontal = 0;
+        int vertical = 0;
 
-		if (horizontal != 0) //go horzontal only for diagonal input
-			vertical = 0;
+        //these return 1, 0, -1 depending on directional arrows0
+        horizontal = (int)Input.GetAxisRaw("Horizontal");
+        vertical = (int)Input.GetAxisRaw("Vertical");
 
-		//execute the following only if directional input
-		if (horizontal != 0 || vertical != 0) {
-			//determine which direction to show the sprite
-			if (horizontal == 0 && vertical > 0)
-				animator.SetTrigger ("PlayerUp");
-			else if (horizontal == 0 && vertical < 0)
-				animator.SetTrigger ("PlayerDown");
-			else if (horizontal > 0 && vertical == 0)
-				animator.SetTrigger ("PlayerRight");
-			else if (horizontal < 0 && vertical == 0)
-				animator.SetTrigger ("PlayerLeft");
+        if (horizontal != 0) //go horzontal only for diagonal input
+            vertical = 0;
 
-			//attempt to move with user's input
-			AttemptMove<Monster> (horizontal, vertical);
-
-            //If enter is pressed, interact with object in front if possible
-		} /*else if (Input.GetButtonDown("Return") || Input.GetButtonDown("Enter")) {
-            Vector2 start = transform.position;
-            Vector2 end = start;
-            
-            boxCollider.enabled = false;
-            RaycastHit2D hit = Physics2D.Linecast(start, end, blockingLayer);
-            boxCollider.enabled = true;
-
-            if (hit.transform != null)
+        //execute the following only if directional input
+        if (horizontal != 0 || vertical != 0)
+        {
+            //determine which direction to show the sprite
+            if (horizontal == 0 && vertical > 0)
             {
-                T hitComponent = hit.transform.GetComponent<T>();
-                if (canMove == false && hitComponent != null)
-                    OnCantMove(hitComponent);
+                animator.SetTrigger("PlayerUp"); //set the sprite to face up
+                Front = Vector2.up; //set front to be "up"
             }
-        }*/
-	}
+            else if (horizontal == 0 && vertical < 0)
+            {
+                animator.SetTrigger("PlayerDown");
+                Front = Vector2.down;
+            }
+            else if (horizontal > 0 && vertical == 0)
+            {
+                animator.SetTrigger("PlayerRight");
+                Front = Vector2.right;
+            }
+            else if (horizontal < 0 && vertical == 0)
+            {
+                animator.SetTrigger("PlayerLeft");
+                Front = Vector2.left;
+            }
 
-	/// <summary>
-	/// This overrides class MovingObject's AttemptMove function which attempt to move the caller
-	/// </summary>
-	protected override void AttemptMove <T> (int x_dir, int y_dir) {
-		base.AttemptMove<T> (x_dir, y_dir);
-		CheckIfGameOver (); //maybe player ran into damaging object
-		GameManager.Instance.PlayersTurn = false;
-	}
+            //attempt to move with user's input
+            AttemptMove<Monster>(horizontal, vertical);
 
-	/// <summary>
-	/// This overrides MovingObject's function. It is called if the caller cannot move as attempted
-	/// </summary>
-	protected override void OnCantMove<T> (T component) {
-		//TODO: define what the player does when run into a blocking object
-	}
+            //If enter is pressed, interact with object in Front if possible
+        }
+        //if the spacebar is pressed
+        else if (Input.GetButtonDown("Accept"))
+        {
+            //setup to send a raycast to detect if
+            //there is an object in fron of player
+            Vector2 start = transform.position;
+            Vector2 end = start + Front;
 
-	/// <summary>
-	/// This is called when the mover runs into a trigger
-	/// </summary>
-	private void OnTriggerEnter2D (Collider2D collidee) {
-		//TODO: this is for entering doors to trigger a scene changeS
-	}
+            BoxCollider.enabled = false; //avoid detecting player
+            RaycastHit2D hit = Physics2D.Linecast(start, end);
+            BoxCollider.enabled = true;
 
-	/// <summary>
-	/// Checks if the player has died to end the game.
-	/// </summary>
-	private void CheckIfGameOver () {
-		if (player_hp <= 0)
-			GameManager.Instance.GameOver();
-	}
+            if (hit.transform != null) //if something is in front
+            {
+                Interactable hit_component = hit.transform.GetComponent<Interactable>();
+                if (hit_component != null) //check if the object is Interactable
+                    hit_component.Interact();
+            }
+        }
+    }
+
+    /// <summary>
+    /// This overrides class MovingObject's AttemptMove function which attempt to move the caller
+    /// </summary>
+    protected override void AttemptMove<T>(int x_dir, int y_dir)
+    {
+        base.AttemptMove<T>(x_dir, y_dir);
+        CheckIfGameOver(); //maybe player ran into damaging object
+    }
+
+    /// <summary>
+    /// This overrides MovingObject's function. It is called if the caller cannot move as attempted
+    /// </summary>
+    protected override void OnCantMove<T>(T component)
+    {
+        //TODO: define what the player does when run into a blocking object
+    }
+
+    /// <summary>
+    /// This is called when the mover runs into a trigger
+    /// </summary>
+    private void OnTriggerEnter2D(Collider2D collidee)
+    {
+        //TODO: this is for entering doors to trigger a scene changeS
+    }
+
+    /// <summary>
+    /// Checks if the player has died to end the game.
+    /// </summary>
+    private void CheckIfGameOver()
+    {
+        if (PlayerHP <= 0)
+            GameManager.Instance.GameOver();
+    }
 
     /// <summary>
 	/// This is the property of Instance for the Singleton Pattern.
@@ -125,22 +156,22 @@ public class Player : MovingObject {
             }
             lock (LockObject)
             { //use lock to ensure only one thread is accesing this critical code block
-                if (_Instance == null)
+                if (BackingInstance == null)
                 {
 
-                    _Instance = (Player)FindObjectOfType(typeof(Player));
+                    BackingInstance = (Player)FindObjectOfType(typeof(Player));
 
                     if (FindObjectsOfType(typeof(Player)).Length > 1)
                     { //if there are more than one, error msg
                         Debug.LogError("[Singleton] There are more than one singleton! " +
                             "Try reopening the scene.");
-                        return _Instance;
+                        return BackingInstance;
                     }
 
-                    if (_Instance == null)
+                    if (BackingInstance == null)
                     { //if there are none, create singleton
                         GameObject singleton = new GameObject();
-                        _Instance = singleton.AddComponent<Player>();
+                        BackingInstance = singleton.AddComponent<Player>();
                         singleton.name = "(singleton) Player";
 
                         DontDestroyOnLoad(singleton);
@@ -148,7 +179,7 @@ public class Player : MovingObject {
                     }
                 }
 
-                return _Instance;
+                return BackingInstance;
             }
         }
     }

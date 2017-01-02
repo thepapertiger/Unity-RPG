@@ -2,7 +2,7 @@
  * AUTHOR:          Shinlynn Kuo, Yu-Che Cheng (Jeffrey), Hamza Awad, Emmilio Segovia
  * DESCRIPTION:     This is to be inherited to enforce the singleton pattern. Derived classes should
  * 				    implement 'protected T () []' as an empty constructor to prevent the 'new'
- * 				    keyword from being used.
+ * 				    keyword from being used. It is abstract.
  * REQUIREMENTS:    None
  */
 
@@ -10,7 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Singleton<T> : MonoBehaviour where T : MonoBehaviour {
+public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour {
 	
 	private static T _Instance; //the backing variable for singleton pattern
 
