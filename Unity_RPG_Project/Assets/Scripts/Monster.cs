@@ -17,11 +17,11 @@ public class Monster : MovingObject {
     private Transform Target;
 
 	// Use this for initialization
-	protected override void Start () {
+	protected override void Awake () {
         Player = GameObject.FindGameObjectWithTag("Player").gameObject;
         AnimatorMonster = GetComponent<Animator>();
 		//MonsterStats = new Stats ("Monster", 1, 50, 0, 5, 5);
-        base.Start();
+        base.Awake();
     }
 
     // Update is called once per frame

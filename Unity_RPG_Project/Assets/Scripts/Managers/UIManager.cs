@@ -27,7 +27,7 @@ public class UIManager : Singleton<UIManager> {
     private static bool IsPrinting = false; //tells Update when printing is in progress
     private static bool SkipAnimation = false; //tells corouines when user wants to skip
 
-    void Start()
+    protected override void Awake()
     {
         DialogueCanvas.SetActive(false); //dialogue is inactive when game starts
 #if UNITY_EDITOR || UNITY_STANDALONE
@@ -35,6 +35,7 @@ public class UIManager : Singleton<UIManager> {
 #else
         Debug.LogError("Dialogue controls not setup for this platform");
 #endif
+        base.Awake();
     }
 
     void Update()

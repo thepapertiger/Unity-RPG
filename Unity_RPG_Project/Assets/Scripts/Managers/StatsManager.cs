@@ -14,13 +14,18 @@ public class StatsManager : Singleton<StatsManager> {
 
 	protected StatsManager () {} //constructor cannot be used - is null
 
-	public Stats PlayerStats;
+    public Stats PlayerStats;
 	public Stats MonsterStats;
 
 	//called on initialization
-	void Awake()
+	protected override void Awake()
 	{
-		PlayerStats = Player.Instance.GetComponent<Stats>();
+        base.Awake();
 	}
+
+    private void Start()
+    {
+        PlayerStats = Player.Instance.GetComponent<Stats>();
+    }
 
 }

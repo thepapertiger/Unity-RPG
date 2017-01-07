@@ -26,7 +26,7 @@ public abstract class MovingObject : MonoBehaviour {
 	private float InverseMoveTime;		//so division is done once [1/seconds]
 
 	//initializations
-	protected virtual void Start () {
+	protected virtual void Awake() {
 		BoxCollider = GetComponent<BoxCollider2D> (); //find component reference
 		Rigidbody2D = GetComponent<Rigidbody2D> (); //find component reference
 		InverseMoveTime = 1 / MoveTime;		 //must be calculated here since MoveTime isnt static

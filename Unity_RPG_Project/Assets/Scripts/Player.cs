@@ -12,7 +12,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class Player : MovingObject
 {
@@ -21,27 +20,31 @@ public class Player : MovingObject
 
     protected Player() { } //constructor cannot be used - is null
 
+    private static Player BackingInstance; //the backing variable for singleton pattern
+	private static object LockObject = new object ();
+    private static bool applicationIsQuitting = false;
+
     private Animator animator;
 	private Stats player_stats;
-    //private int MaxHP = 100; //set PlayerHP <= MaxHP when healing
-    //private int PlayerHP; //current hp for scene
-    //private int PlayerAttackDamage = 10; //current_attack_damage for the scene
-
     private Vector2 Front;
-    private static Player BackingInstance; //the backing variable for singleton pattern
-    private static object LockObject = new object();
 
-    // Use this for initialization
-    protected override void Start()
+    // Use this for initicalization
+    protected override void Awake()
     { //overrides the MovingObject's Start function
-        animator = GetComponent<Animator>();
-		player_stats = GetComponent<Stats> ();
-        //PlayerHP = MaxHP;
-        Front = Vector2.down;
-        base.Start();
+        if (BackingInstance != null)
+            Destroy(gameObject);
+        else {
+            BackingInstance = Instance;
+            DontDestroyOnLoad(BackingInstance);
+
+            animator = GetComponent<Animator>();
+            player_stats = GetComponent<Stats>();
+            //PlayerHP = MaxHP;
+            Front = Vector2.down;
+            base.Awake();
+        }
     }
 
-    // Update is called once per frame
     void Update()
     {
 
@@ -59,26 +62,21 @@ public class Player : MovingObject
             vertical = 0;
 
         //execute the following only if directional input
-        if (horizontal != 0 || vertical != 0)
-        {
+        if (horizontal != 0 || vertical != 0) {
             //determine which direction to show the sprite
-            if (horizontal == 0 && vertical > 0)
-            {
+            if (horizontal == 0 && vertical > 0) {
                 animator.SetTrigger("PlayerUp"); //set the sprite to face up
                 Front = Vector2.up; //set front to be "up"
             }
-            else if (horizontal == 0 && vertical < 0)
-            {
+            else if (horizontal == 0 && vertical < 0) {
                 animator.SetTrigger("PlayerDown");
                 Front = Vector2.down;
             }
-            else if (horizontal > 0 && vertical == 0)
-            {
+            else if (horizontal > 0 && vertical == 0) {
                 animator.SetTrigger("PlayerRight");
                 Front = Vector2.right;
             }
-            else if (horizontal < 0 && vertical == 0)
-            {
+            else if (horizontal < 0 && vertical == 0) {
                 animator.SetTrigger("PlayerLeft");
                 Front = Vector2.left;
             }
@@ -89,8 +87,7 @@ public class Player : MovingObject
             //If enter is pressed, interact with object in Front if possible
         }
         //if the spacebar is pressed
-        else if (Input.GetButtonDown("Accept"))
-        {
+        else if (Input.GetButtonDown("Accept")) {
             //setup to send a raycast to detect if
             //there is an object in fron of player
             Vector2 start = transform.position;
@@ -172,11 +169,7 @@ public class Player : MovingObject
 
                     if (BackingInstance == null)
                     { //if there are none, create singleton
-                        GameObject singleton = new GameObject();
-                        BackingInstance = singleton.AddComponent<Player>();
-                        singleton.name = "(singleton) Player";
-
-                        DontDestroyOnLoad(singleton);
+                        Debug.LogError("There is no player.");
 
                     }
                 }
@@ -186,13 +179,11 @@ public class Player : MovingObject
         }
     }
 
-    private static bool applicationIsQuitting = false;
-
     /// <summary>
     /// This is to prevent a buggy ghost of the Instance
     /// after the singleton is destroyed.
     /// </summary>
-    public void OnDestroy()
+    public void OnApplicationQuit()
     {
         applicationIsQuitting = true;
     }

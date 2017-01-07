@@ -10,12 +10,17 @@ using UnityEngine;
 
 public class GameManager : Singleton<GameManager> {
 
+    protected GameManager() { } //constructor cannot be used - is null
 
-	protected GameManager () {} //constructor cannot be used - is null
-    	/// <summary>
+    protected override void Awake()
+    {
+        base.Awake();
+    }
+
+    /// <summary>
 	/// Stops the game by disabling the Game Manager.
 	/// </summary>
 	public void GameOver() {
-		enabled = false;
+		//enabled = false;
 	}
 }

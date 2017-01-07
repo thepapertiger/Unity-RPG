@@ -12,7 +12,7 @@ using UnityEngine;
 public class DoorMessage : Interactable {
 
     private string message = "The door is locked. Why are you still standing there like " +
-        "an idot? Can't you read the door is locked. Oh and by the way, notice how this " +
+        "an idiot? Can't you read the door is locked. Oh and by the way, notice how this " +
         "long text wraps?";
 
 	public override void Interact () {
