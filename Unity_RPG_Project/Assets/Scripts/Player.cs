@@ -15,8 +15,9 @@ using UnityEngine;
 
 public class Player : MovingObject
 {
-
     public bool PlayersTurn = true;
+    public int Chips = 100;
+
 
     protected Player() { } //constructor cannot be used - is null
 
@@ -47,9 +48,8 @@ public class Player : MovingObject
 
     void Update()
     {
-
-        if (!PlayersTurn || IAmMoving)
-            return;
+       if (!PlayersTurn || IAmMoving)
+        return;
 
         int horizontal = 0;
         int vertical = 0;
