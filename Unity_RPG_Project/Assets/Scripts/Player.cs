@@ -15,9 +15,11 @@ using UnityEngine;
 
 public class Player : MovingObject
 {
+    //TODO: remove this
+    //temporary until update BattleManager to check state machine
     public bool PlayersTurn = true;
-    public int Chips = 100;
 
+    public int Chips = 100;
 
     protected Player() { } //constructor cannot be used - is null
 
@@ -27,34 +29,43 @@ public class Player : MovingObject
 
     private Animator animator;
 	private Stats player_stats;
-    private Vector2 Front;
+    private Vector2 Front = Vector2.down; //indicates the direction the player is facing
+    private float PlayerVelocity = 0;
 
-    // Use this for initicalization
     protected override void Awake()
-    { //overrides the MovingObject's Start function
+    {
         if (BackingInstance != null)
             Destroy(gameObject);
         else {
             BackingInstance = Instance;
             DontDestroyOnLoad(BackingInstance);
-
+            
+            //initializations
             animator = GetComponent<Animator>();
             player_stats = GetComponent<Stats>();
             //PlayerHP = MaxHP;
-            Front = Vector2.down;
             base.Awake();
         }
     }
 
     void Update()
     {
-       if (!PlayersTurn || IAmMoving)
-        return;
+        if (GameManager.Instance.IsState(GameStates.IdleState) && IAmMoving) {
+            GameManager.Instance.SetState(GameStates.PlayerMovingState);
+            animator.SetBool("IAmMoving", IAmMoving);
+        }
+        else if (GameManager.Instance.IsState(GameStates.PlayerMovingState) && !IAmMoving) {
+            GameManager.Instance.SetState(GameStates.IdleState);
+            animator.SetBool("IAmMoving", IAmMoving);
+        }
+            
+        if (!GameManager.Instance.IsState(GameStates.IdleState))
+            return;
 
         int horizontal = 0;
         int vertical = 0;
 
-        //these return 1, 0, -1 depending on directional arrows0
+        //these return 1, 0, -1 depending on directional arrows
         horizontal = (int)Input.GetAxisRaw("Horizontal");
         vertical = (int)Input.GetAxisRaw("Vertical");
 
@@ -65,26 +76,27 @@ public class Player : MovingObject
         if (horizontal != 0 || vertical != 0) {
             //determine which direction to show the sprite
             if (horizontal == 0 && vertical > 0) {
-                animator.SetTrigger("PlayerUp"); //set the sprite to face up
+                if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerUp"))
+                    animator.SetTrigger("PlayerUp"); //set the sprite to face up
                 Front = Vector2.up; //set front to be "up"
             }
             else if (horizontal == 0 && vertical < 0) {
-                animator.SetTrigger("PlayerDown");
+                if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerDown"))
+                    animator.SetTrigger("PlayerDown");
                 Front = Vector2.down;
             }
             else if (horizontal > 0 && vertical == 0) {
-                animator.SetTrigger("PlayerRight");
+                if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerRight"))
+                    animator.SetTrigger("PlayerRight");
                 Front = Vector2.right;
             }
             else if (horizontal < 0 && vertical == 0) {
-                animator.SetTrigger("PlayerLeft");
+                if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerLeft"))
+                    animator.SetTrigger("PlayerLeft");
                 Front = Vector2.left;
             }
-
             //attempt to move with user's input
             AttemptMove<Monster>(horizontal, vertical);
-
-            //If enter is pressed, interact with object in Front if possible
         }
         //if the spacebar is pressed
         else if (Input.GetButtonDown("Accept")) {
@@ -100,12 +112,12 @@ public class Player : MovingObject
             if (hit.transform != null) //if something is in front
             {
                 Interactable hit_component = hit.transform.GetComponent<Interactable>();
-                if (hit_component != null) //check if the object is Interactable
+                if (hit_component)
                     hit_component.Interact();
             }
         }
     }
-
+    
     /// <summary>
     /// This overrides class MovingObject's AttemptMove function which attempt to move the caller
     /// </summary>
@@ -141,7 +153,7 @@ public class Player : MovingObject
     }
 
     /// <summary>
-	/// This is the property of Instance for the Singleton Pattern.
+	/// This is the Instance property for the Singleton Pattern.
 	/// </summary>
     public static Player Instance
     {

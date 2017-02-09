@@ -19,8 +19,9 @@ public abstract class MovingObject : MonoBehaviour {
 	public float MoveTime = 0.1f;	//rate of movement [seconds]
 	public LayerMask BlockingLayer; //the layer that will block moving objects
 
-	protected bool IAmMoving = false;
+	protected float CurrentVelocity = 0;
 	protected BoxCollider2D BoxCollider; //reference to this component
+    protected bool IAmMoving = false;
 
 	private Rigidbody2D Rigidbody2D;			//reference to this component
 	private float InverseMoveTime;		//so division is done once [1/seconds]
@@ -46,8 +47,10 @@ public abstract class MovingObject : MonoBehaviour {
 		if (hit.transform != null) //onCantMove will be called by the AttemptMove function
 			return false;
 
-        IAmMoving = true; //movement is taking place, to not attempt to move again until done
-        StartCoroutine (SmoothMovement (end));
+        if (!IAmMoving) {
+            IAmMoving = true;
+            StartCoroutine(SmoothMovement(end));
+        }
         return true;
 	}
 
@@ -66,7 +69,7 @@ public abstract class MovingObject : MonoBehaviour {
 			sqr_remaining_dist = (transform.position - end).sqrMagnitude;
 			yield return null; //wait for a frame before loop reiteration
 		}
-		IAmMoving = false;
+        IAmMoving = false;
 	}
 
 	/// <summary>
