@@ -14,23 +14,20 @@ public class Monster : MovingObject {
 
 	private Animator AnimatorMonster;
     private GameObject Player;
-    private Transform Player_Target;
-    private Stats MonsterStats;
+    private Transform Target;
 
 	// Use this for initialization
 	protected override void Awake () {
         Player = GameObject.FindGameObjectWithTag("Player").gameObject;
-        Player_Target = Player.GetComponent<Transform>();
         AnimatorMonster = GetComponent<Animator>();
-        MonsterStats = GetComponent<Stats>();
-        //MonsterStats = new Stats ("Monster", 1, 50, 0, 5, 5);
+		//MonsterStats = new Stats ("Monster", 1, 50, 0, 5, 5);
         base.Awake();
     }
 
     // Update is called once per frame
     void Update()
     {
-        DetectPlayer();
+
     }
 
     /// <summary>
@@ -73,22 +70,23 @@ public class Monster : MovingObject {
         int x_dir = 0;
         int y_dir = 0;
         //If the difference in positions is approximately zero (Epsilon) do the following:
-        if ((Player_Target.position.x - transform.position.x) < float.Epsilon)
+        if (Mathf.Abs(Target.position.x - transform.position.x) < float.Epsilon)
         {
             //If the y coordinate of the target's (player) position is greater than the y coordinate of this enemy's position set y direction 1 (to move up). If not, set it to -1 (to move down).
-            y_dir = Player_Target.position.y > transform.position.y ? 1 : -1;
+            y_dir = Target.position.y > transform.position.y ? 1 : -1;
         }
         //If the difference in positions is not approximately zero (Epsilon) do the following:
         else
         {
             //Check if target x position is greater than enemy's x position, if so set x direction to 1 (move right), if not set to -1 (move left).
-            x_dir = Player_Target.position.x > transform.position.x ? 1 : -1;
+            x_dir = Target.position.x > transform.position.x ? 1 : -1;
         }
+
         for (int i = 0; i < colliders.Length; i++)
         {
             if(colliders[i].gameObject.tag == "Player")
             {
-               AttemptMove<Player>(x_dir, y_dir);
+                AttemptMove<Player>(x_dir, y_dir);
             }
         }
     }
