@@ -12,13 +12,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MovingObject
 {
-
-    public bool PlayersTurn = true;
-
     protected Player() { } //constructor cannot be used - is null
+
+    public int Chips = 100;
 
     private static Player BackingInstance; //the backing variable for singleton pattern
 	private static object LockObject = new object ();
@@ -26,35 +26,92 @@ public class Player : MovingObject
 
     private Animator animator;
 	private Stats player_stats;
-    private Vector2 Front;
+    private Vector2 Front = Vector2.down; //indicates the direction the player is facing
+    private float PlayerVelocity = 0;
 
-    // Use this for initicalization
+//#####################   MOVE THIS TO PLACE WHERE STATS ARE UPDATED #######################################
+    public Transform PartyDisplay;
+    public List<Stats> Party = new List<Stats>();
+
+    List<GameObject> blocks = new List<GameObject>();
+    private void Start()
+    {
+        GameObject current_block;
+        for (int i = 0; i < PartyDisplay.childCount; i++) { //for each child block
+            current_block = PartyDisplay.GetChild(i).gameObject;
+            blocks.Add(current_block); //save reference
+            current_block.SetActive(false); //deactivate
+        }
+    }
+
+    /// <summary>
+    /// Updates the main menu display of the party.
+    /// "blocks" refers to a MenuPartyBlock item which is a wide rectangle that shows a character's data
+    /// in the main menu.
+    /// </summary>
+    public void UpdateParty()
+    {
+        //get and disable last items' blocks
+        for (int i = 0; i < PartyDisplay.childCount; i++) { //for each child block
+            blocks[i].SetActive(false); //deactivate
+        }
+        //put data from each party
+        for (int j = 0; j < Party.Count; j++) {
+            blocks[j].GetComponent<MenuPartyBlock>().MyStats = Party[j];
+            //access each child display object and update it
+            blocks[j].transform.FindChild("Sprite").GetComponent<Image>().sprite = Party[j].SmallSprite;
+            blocks[j].transform.FindChild("Name").GetComponent<Text>().text = Party[j].Name;
+            //health bars, etc.
+            blocks[j].transform.FindChild("SliderHP").GetComponent<Slider>().value = Party[j].HP * 1.0f / Party[j].MaxHP;
+            blocks[j].transform.FindChild("SliderMP").GetComponent<Slider>().value = Party[j].MP * 1.0f / Party[j].MaxMP;
+            blocks[j].transform.FindChild("SliderEXP").GetComponent<Slider>().value = Party[j].EXP * 1.0f / Party[j].EXPNeeded;
+            //numerical stats
+            blocks[j].transform.FindChild("HP").GetComponent<Text>().text = Party[j].HP + "/" + Party[j].MaxHP;
+            blocks[j].transform.FindChild("MP").GetComponent<Text>().text = Party[j].MP + "/" + Party[j].MaxMP;
+            blocks[j].transform.FindChild("EXP").GetComponent<Text>().text = Party[j].EXP + "/" + Party[j].EXPNeeded;
+            blocks[j].transform.FindChild("Level").GetComponent<Text>().text = "Level   " + Party[j].Level;
+            blocks[j].transform.FindChild("ATK").GetComponent<Text>().text = Party[j].AttackDamage.ToString();
+            blocks[j].transform.FindChild("DEF").GetComponent<Text>().text = Party[j].Defense.ToString();
+            blocks[j].transform.FindChild("AGL").GetComponent<Text>().text = Party[j].Agility.ToString();
+            blocks[j].SetActive(true);
+        }
+    }
+//##########################################################################################################
+
     protected override void Awake()
-    { //overrides the MovingObject's Start function
+    {
         if (BackingInstance != null)
             Destroy(gameObject);
         else {
             BackingInstance = Instance;
             DontDestroyOnLoad(BackingInstance);
-
+            
+            //initializations
             animator = GetComponent<Animator>();
             player_stats = GetComponent<Stats>();
             //PlayerHP = MaxHP;
-            Front = Vector2.down;
             base.Awake();
         }
     }
 
     void Update()
     {
-
-        if (!PlayersTurn || IAmMoving)
+        if (GameManager.Instance.IsState(GameStates.IdleState) && IAmMoving) {
+            GameManager.Instance.SetState(GameStates.PlayerMovingState);
+            animator.SetBool("IAmMoving", IAmMoving);
+        }
+        else if (GameManager.Instance.IsState(GameStates.PlayerMovingState) && !IAmMoving) {
+            GameManager.Instance.SetState(GameStates.IdleState);
+            animator.SetBool("IAmMoving", IAmMoving);
+        }
+            
+        if (!GameManager.Instance.IsState(GameStates.IdleState))
             return;
 
         int horizontal = 0;
         int vertical = 0;
 
-        //these return 1, 0, -1 depending on directional arrows0
+        //these return 1, 0, -1 depending on directional arrows
         horizontal = (int)Input.GetAxisRaw("Horizontal");
         vertical = (int)Input.GetAxisRaw("Vertical");
 
@@ -65,26 +122,27 @@ public class Player : MovingObject
         if (horizontal != 0 || vertical != 0) {
             //determine which direction to show the sprite
             if (horizontal == 0 && vertical > 0) {
-                animator.SetTrigger("PlayerUp"); //set the sprite to face up
+                if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerUp"))
+                    animator.SetTrigger("PlayerUp"); //set the sprite to face up
                 Front = Vector2.up; //set front to be "up"
             }
             else if (horizontal == 0 && vertical < 0) {
-                animator.SetTrigger("PlayerDown");
+                if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerDown"))
+                    animator.SetTrigger("PlayerDown");
                 Front = Vector2.down;
             }
             else if (horizontal > 0 && vertical == 0) {
-                animator.SetTrigger("PlayerRight");
+                if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerRight"))
+                    animator.SetTrigger("PlayerRight");
                 Front = Vector2.right;
             }
             else if (horizontal < 0 && vertical == 0) {
-                animator.SetTrigger("PlayerLeft");
+                if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerLeft"))
+                    animator.SetTrigger("PlayerLeft");
                 Front = Vector2.left;
             }
-
             //attempt to move with user's input
             AttemptMove<Monster>(horizontal, vertical);
-
-            //If enter is pressed, interact with object in Front if possible
         }
         //if the spacebar is pressed
         else if (Input.GetButtonDown("Accept")) {
@@ -100,12 +158,12 @@ public class Player : MovingObject
             if (hit.transform != null) //if something is in front
             {
                 Interactable hit_component = hit.transform.GetComponent<Interactable>();
-                if (hit_component != null) //check if the object is Interactable
+                if (hit_component)
                     hit_component.Interact();
             }
         }
     }
-
+    
     /// <summary>
     /// This overrides class MovingObject's AttemptMove function which attempt to move the caller
     /// </summary>
@@ -141,7 +199,7 @@ public class Player : MovingObject
     }
 
     /// <summary>
-	/// This is the property of Instance for the Singleton Pattern.
+	/// This is the Instance property for the Singleton Pattern.
 	/// </summary>
     public static Player Instance
     {
