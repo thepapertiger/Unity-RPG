@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DialogueFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <name>Tutorial</name>
+  <hideFlags />
+  <entries>
+    <DialogueEntry>
+      <id>TutorialStart</id>
+      <maxLineId>29</maxLineId>
+      <speakers>
+        <string>Tutorial</string>
+        <string>User</string>
+      </speakers>
+    </DialogueEntry>
+  </entries>
+  <lines>
+    <DialogueLine>
+      <id>0</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue />
+      <output>
+        <int>1</int>
+      </output>
+      <position>
+        <x>10</x>
+        <y>10</y>
+      </position>
+      <userData />
+      <speaker />
+    </DialogueLine>
+    <DialogueLine>
+      <id>1</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>Hello and Welcome to the tutorial on the Dialogue Editor extension.</dialogue>
+      <output>
+        <int>2</int>
+      </output>
+      <position>
+        <x>159</x>
+        <y>9</y>
+      </position>
+      <userData />
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>2</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>This tutorials aim is to provide a howto and information on the Dialogue Editor extension.</dialogue>
+      <output>
+        <int>3</int>
+      </output>
+      <position>
+        <x>306</x>
+        <y>8</y>
+      </position>
+      <userData />
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>3</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>Which elements would you like to have some more information on?</dialogue>
+      <output>
+        <int>4</int>
+        <int>6</int>
+        <int>5</int>
+      </output>
+      <position>
+        <x>447</x>
+        <y>11</y>
+      </position>
+      <userData />
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>4</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>I would like to know more about the editor window.</dialogue>
+      <output>
+        <int>7</int>
+      </output>
+      <position>
+        <x>632</x>
+        <y>-91</y>
+      </position>
+      <userData>1</userData>
+      <speaker>User</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>5</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>I would like to know more about the usage in scripts</dialogue>
+      <output>
+        <int>12</int>
+      </output>
+      <position>
+        <x>620</x>
+        <y>108</y>
+      </position>
+      <userData>2</userData>
+      <speaker>User</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>6</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>I don't need more information. I already know enough.</dialogue>
+      <output />
+      <position>
+        <x>434</x>
+        <y>115</y>
+      </position>
+      <userData>3</userData>
+      <speaker>User</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>7</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>The Dialogue Editor screen can be accesed in the unity editor through the window menu item.</dialogue>
+      <output>
+        <int>8</int>
+      </output>
+      <position>
+        <x>772</x>
+        <y>-91</y>
+      </position>
+      <userData>image:0</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>8</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>The window itself is divided into 2 parts.</dialogue>
+      <output>
+        <int>9</int>
+      </output>
+      <position>
+        <x>913</x>
+        <y>-95</y>
+      </position>
+      <userData>image:0</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>9</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>At the top left side there is a combobox to select the dialogue file you want to edit. Next to this combobox are 2 buttons. The "+" button creates a new file, and the "-" button deletes the currently selected file.</dialogue>
+      <output>
+        <int>10</int>
+      </output>
+      <position>
+        <x>1043</x>
+        <y>-96</y>
+      </position>
+      <userData>image:1</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>10</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>Just below those controls, is a list that shows all the currently defined dialogues in the selected file. And below that, are buttons for adding and removing dialogues.</dialogue>
+      <output>
+        <int>11</int>
+      </output>
+      <position>
+        <x>1187</x>
+        <y>-95</y>
+      </position>
+      <userData>image:2</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>11</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>The right side of the window contains the graph of the dialogue. Below that graph, is the text area that contains the text of the currently selected node.</dialogue>
+      <output>
+        <int>21</int>
+      </output>
+      <position>
+        <x>1327</x>
+        <y>-95</y>
+      </position>
+      <userData>image:3</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>12</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>The script to use the dialogue system is divided into three parts.</dialogue>
+      <output>
+        <int>13</int>
+      </output>
+      <position>
+        <x>770</x>
+        <y>108</y>
+      </position>
+      <userData />
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>13</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>The first part is to load the correct dialogue file. This is done using DialogueManager.LoadDialogueFile. This is usualy done only once per scene/script.</dialogue>
+      <output>
+        <int>15</int>
+      </output>
+      <position>
+        <x>920</x>
+        <y>108</y>
+      </position>
+      <userData>image:6</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>15</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>The next part is to open the correct dialogue. This is done using manager.GetDialogue. This function returns an interface to the dialogue itself.</dialogue>
+      <output>
+        <int>17</int>
+      </output>
+      <position>
+        <x>1059</x>
+        <y>109</y>
+      </position>
+      <userData>image:6</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>17</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>The function Start() returns the dialogue to the begining. </dialogue>
+      <output>
+        <int>18</int>
+      </output>
+      <position>
+        <x>772</x>
+        <y>181</y>
+      </position>
+      <userData>image:6</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>18</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>The function GetChoices returns an array of all the choices available. If it is a linear conversation, then there will be only one choice returned.</dialogue>
+      <output>
+        <int>19</int>
+      </output>
+      <position>
+        <x>917</x>
+        <y>179</y>
+      </position>
+      <userData>image:7</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>19</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>With PickChoice() you select the choice that was made and the conversation continues.</dialogue>
+      <output>
+        <int>20</int>
+      </output>
+      <position>
+        <x>1059</x>
+        <y>179</y>
+      </position>
+      <userData>image:7</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>20</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>So in a normal situation, you will constantly be doing GetChoices and PickChoice to keep the dialogue going.</dialogue>
+      <output>
+        <int>3</int>
+      </output>
+      <position>
+        <x>1215</x>
+        <y>181</y>
+      </position>
+      <userData />
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>21</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>The graph contains a nodes which represent one line of a dialogue. When you select a node, buttons appear round it. These buttons can be used to perform various actions.</dialogue>
+      <output>
+        <int>24</int>
+      </output>
+      <position>
+        <x>1472</x>
+        <y>-93</y>
+      </position>
+      <userData>image:4</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>24</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>You can move the node around by click-dragging its titlebar. Below the titlebar is a combobox through which you can select the speaker of the current line.</dialogue>
+      <output>
+        <int>25</int>
+      </output>
+      <position>
+        <x>775</x>
+        <y>-20</y>
+      </position>
+      <userData>image:5</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>25</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>Below the speaker combobox, is a textfield for userdata. This data will be supplied to the script when the line is reached. This can be used to supply metadata such as image names to the scripts.</dialogue>
+      <output>
+        <int>26</int>
+      </output>
+      <position>
+        <x>926</x>
+        <y>-21</y>
+      </position>
+      <userData>image:5</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>26</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>There are 4 buttons on the outside of the node, that have various functions. The small 'x' button at the top is used to delete a node. The '+' button on the right is used to create a new node. The newly created node will be automaticly connected to the current node.</dialogue>
+      <output>
+        <int>27</int>
+      </output>
+      <position>
+        <x>1076</x>
+        <y>-16</y>
+      </position>
+      <userData>image:5</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+    <DialogueLine>
+      <id>27</id>
+      <dialogueEntry>TutorialStart</dialogueEntry>
+      <dialogue>The 'X' to the left is to disconnect an incoming link. You do that by clicking the button and then clicking the titlebar of the node you want to disconnect from. The '-&gt;' button on the right side is used to create new outgoing links. The usage is the same as the disconnect button.</dialogue>
+      <output>
+        <int>3</int>
+      </output>
+      <position>
+        <x>1225</x>
+        <y>-15</y>
+      </position>
+      <userData>image:5</userData>
+      <speaker>Tutorial</speaker>
+    </DialogueLine>
+  </lines>
+</DialogueFile>
