@@ -25,7 +25,7 @@ using UnityEngine.SceneManagement;
 public enum GameStates {IdleState, PlayerMovingState, DialogueState, BattleState, MainMenuState};
 
 public class GameManager : Singleton<GameManager> {
-
+    //gamemanager
     protected GameManager() { } //constructor cannot be used - is null
 
     private Animator GameState; //The game state machine (see notes in header)

@@ -142,7 +142,6 @@ public class Inventory : Singleton<Inventory> {
                 update_dict[item_name] -= quantity;
             }
             if (update_dict[item_name] <= 0) {
-                print("removed from dict");
                 update_dict.Remove(item_name);
             }
             UpdateItemGrids(update_dict, update_grid);

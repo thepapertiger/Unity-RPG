@@ -35,8 +35,10 @@ public abstract class MovingObject : MonoBehaviour {
 
 	/// <summary>
 	/// returns true if successful move, and updates hit with collidee's location
+    /// Monster caller parameter is for monsters to reserve their spot they are moving
+    /// to so others dont go there and fuse with them.
 	/// </summary>
-	protected bool Move (int x_dir, int y_dir, out RaycastHit2D hit) {
+	protected bool Move (int x_dir, int y_dir, out RaycastHit2D hit, Monster caller) {
 		Vector2 start = transform.position; //get current position
 		Vector2 end = start + new Vector2 (x_dir, y_dir); //the x_dir/y_dir are user input values 1, 0, or -1
 		
@@ -49,7 +51,7 @@ public abstract class MovingObject : MonoBehaviour {
 
         if (!IAmMoving) {
             IAmMoving = true;
-            StartCoroutine(SmoothMovement(end));
+            StartCoroutine(SmoothMovement(end, caller));
         }
         return true;
 	}
@@ -57,8 +59,9 @@ public abstract class MovingObject : MonoBehaviour {
 	/// <summary>
 	/// Move the caller from current position to "end" at the rate of "MoveTime"
 	/// </summary>
-	protected IEnumerator SmoothMovement (Vector3 end) {
-
+	protected IEnumerator SmoothMovement (Vector3 end, Monster caller) {
+        if (caller != null) //activate the spot reserver for monsters
+            caller.transform.GetChild(0).gameObject.SetActive(true);
 		float sqr_remaining_dist = (transform.position - end).sqrMagnitude; //transform.position for v3 subtraction (Rigidbody2D=v2)
 		while (sqr_remaining_dist > float.Epsilon) { //float.Epsilon is ~~0, i guess to round the movement)
 			Vector3 new_position = Vector3.MoveTowards(Rigidbody2D.position, end, InverseMoveTime * Time.deltaTime);
@@ -69,8 +72,12 @@ public abstract class MovingObject : MonoBehaviour {
 			sqr_remaining_dist = (transform.position - end).sqrMagnitude;
 			yield return null; //wait for a frame before loop reiteration
 		}
+        if (caller != null) {
+            //If a monster called, reset their spot placeholder
+            caller.transform.GetChild(0).gameObject.SetActive(false);
+        }
         IAmMoving = false;
-	}
+    }
 
 	/// <summary>
 	/// Attempt to move, otherwise call OnCantMove().
@@ -80,7 +87,7 @@ public abstract class MovingObject : MonoBehaviour {
 			where T : Component {
 	
 		RaycastHit2D hit;
-		bool canMove = Move (x_dir, y_dir, out hit);
+		bool canMove = Move (x_dir, y_dir, out hit, null);
 
 		if (hit.transform != null) {
 			T hit_component = hit.transform.GetComponent<T> ();
@@ -89,10 +96,30 @@ public abstract class MovingObject : MonoBehaviour {
 		}
 	}
 
-	/// <summary>
-	/// This is called if the caller cannot move as attempted
+    /// <summary>
+	/// Attempt to move, otherwise call OnCantMove().
+	/// Designed to interact with a single component type.
+    /// Monster caller parameter is for monsters to reserve their spot they are moving
+    /// to so others dont go there and fuse with them.
 	/// </summary>
-	protected abstract void OnCantMove <T> (T component) //no brackets since abstract //play thumpty sound
+	protected virtual void AttemptMove<T>(int x_dir, int y_dir, Monster caller)
+            where T : Component
+    {
+
+        RaycastHit2D hit;
+        bool canMove = Move(x_dir, y_dir, out hit, caller);
+
+        if (hit.transform != null) {
+            T hit_component = hit.transform.GetComponent<T>();
+            if (canMove == false && hit_component != null)
+                OnCantMove(hit_component);
+        }
+    }
+
+    /// <summary>
+    /// This is called if the caller cannot move as attempted
+    /// </summary>
+    protected abstract void OnCantMove <T> (T component) //no brackets since abstract //play thumpty sound
 		where T : Component;
 	
 }
