@@ -36,7 +36,7 @@ public class MenuPartyBlock : MonoBehaviour, IPointerEnterHandler, IPointerExitH
                         break;
                 case (ItemTypes.Weapon):
                     if (SelectedItem.AttackValue != 0)
-                        UpdateStatDisplay("ATK", MyStats.AttackDamage, SelectedItem.AttackValue);
+                        UpdateStatDisplay("STR", MyStats.Strength, SelectedItem.AttackValue);
                     if (SelectedItem.AgilityValue != 0)
                         UpdateStatDisplay("AGL", MyStats.Agility, SelectedItem.AgilityValue);
                     break;

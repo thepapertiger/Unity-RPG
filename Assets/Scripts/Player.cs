@@ -72,7 +72,7 @@ public class Player : MovingObject
             blocks[j].transform.FindChild("MP").GetComponent<Text>().text = current_stats.MP + "/" + current_stats.MaxMP;
             blocks[j].transform.FindChild("EXP").GetComponent<Text>().text = current_stats.EXP + "/" + current_stats.EXPNeeded;
             blocks[j].transform.FindChild("Level").GetComponent<Text>().text = "Level   " + current_stats.Level;
-            blocks[j].transform.FindChild("ATK").GetComponent<Text>().text = current_stats.AttackDamage.ToString();
+			blocks[j].transform.FindChild("ATK").GetComponent<Text>().text = current_stats.Strength.ToString();
             blocks[j].transform.FindChild("DEF").GetComponent<Text>().text = current_stats.Defense.ToString();
             blocks[j].transform.FindChild("AGL").GetComponent<Text>().text = current_stats.Agility.ToString();
             blocks[j].SetActive(true);
