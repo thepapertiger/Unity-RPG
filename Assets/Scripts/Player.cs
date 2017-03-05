@@ -112,7 +112,7 @@ public class Player : MovingObject
 
         //Battle Scene Debugger
         if (Input.GetButtonDown("Fire1"))
-            BattleManager.Instance.Encounter(BattleManager.Instance.MonsterStats);
+			BattleManager.Instance.Encounter(BattleManager.Instance.Monster);
 
         int horizontal = 0;
         int vertical = 0;

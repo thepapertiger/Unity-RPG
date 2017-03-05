@@ -28,6 +28,9 @@ public class GameManager : Singleton<GameManager> {
     //gamemanager
     protected GameManager() { } //constructor cannot be used - is null
 
+	//party of characters
+	public List<GameObject> Party;
+
     private Animator GameState; //The game state machine (see notes in header)
     private HashSet<string> ItemReceivedRecords = new HashSet<string>();
 

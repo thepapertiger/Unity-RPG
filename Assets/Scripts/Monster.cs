@@ -11,6 +11,9 @@ using UnityEngine;
 
 public class Monster : MovingObject {
 
+	//[SerializeField]
+	public List<Stats> EnemyParty = new List<Stats> ();
+
     //public Stats MonsterStats;
     [Tooltip("Set whether this AI searches for the best path")]
     public bool Pathfinding;
@@ -82,7 +85,9 @@ public class Monster : MovingObject {
                     NextActionTime += MoveRate; //set the next time to move
                     float sqr_magnitude = Vector3.SqrMagnitude(new Vector3((Target.position.x - transform.position.x), (Target.position.y - transform.position.y)));
                     if (sqr_magnitude <= 1) {
-                        BattleManager.Instance.Encounter(GetComponent<Stats>());
+                        //BattleManager.Instance.Encounter(GetComponent<Stats>());
+						//BattleManager.Instance.Encounter(this);
+						OneVOneManager.Instance.Encounter(this);
                     }
                     else if (sqr_magnitude <= (Radius * Radius) && !IAmMoving) {
                         if (!Pathfinding)
@@ -115,7 +120,7 @@ public class Monster : MovingObject {
         {
             //start battle screen, get component of the battle game object, or maybe the game manager will handle this
             Debug.Log("Monster wants to battle!");
-            BattleManager.Instance.Encounter(this.GetComponent<Stats>());
+            BattleManager.Instance.Encounter(EnemyParty);
         }
     }
     */
