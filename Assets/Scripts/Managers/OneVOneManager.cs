@@ -30,6 +30,24 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 	private Text dmg2;
 	private Text dmg3;
 	private Text dmg4;
+	private Text dmg5;
+	private Text dmg6;
+	private Text dmg7;
+	private Text dmg8;
+
+	private GameObject[] PlayerPositions;
+	private GameObject p_pos1;
+	private GameObject p_pos2;
+	private GameObject p_pos3;
+	private GameObject p_pos4;
+
+	private GameObject[] EnemyPositions;
+	private GameObject e_pos1;
+	private GameObject e_pos2;
+	private GameObject e_pos3;
+	private GameObject e_pos4;
+
+	//Dictionary<int, > posMap;
 
 	private Button[] buttons;
 	private Button ATTACK_Button;
@@ -42,7 +60,7 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 
 	private List<Stats> turn_order = new List<Stats>();	//list that will be ordered to keep track of turn order
 	private Stats current_stats;						//the current stat taking its turn in combat
-	//private bool player_turn = false;
+	private bool waiting = false;
 
 	//ListIndex property: keeps track of whose turn it is in battle
 	private int _ListIndex = 0;
@@ -58,15 +76,15 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 	}
 
 	//option states
-	public enum states {NULL = 0, ATTACK = 1, DEFEND = 2, SKILLS = 3, ITEMS = 4, RUN = 5, TARGETING = 9};
-	private states curr_state;	//memorizes what is the crrent state the battle_canvas is in
+	public enum states {NULL = 0, ATTACK = 1, DEFEND = 2, SKILLS = 3, ITEMS = 4, RUN = 5, TARGETING = 9, WAITING = 10};
+	private states curr_state;	//memorizes what is the current state the battle_canvas is in
 
 	protected override void Awake()
 	{
 		//MonsterStats = new Stats ("GenericMonster", false, 1, 50, 0, 5, 5, 5, 5, 5, 5);
 		//PlayerStats = new Stats ("GenericPlayer", true, 1, 100, 100, 10, 10, 10, 10, 10, 10);
+		//posMap = new Dictionary<Stats, GameObject> ();
 		BattleCanvas = GetComponent<Canvas>();
-		//current_stats = turn_order.ElementAt (0);
 		base.Awake();
 		gameObject.SetActive(false);    //hide BattleCanvas from game view 
 	}
@@ -112,6 +130,18 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 			case "damage4":
 				dmg4 = child;
 				break;
+			case "damage5":
+				dmg5 = child;
+				break;
+			case "damage6":
+				dmg6 = child;
+				break;
+			case "damage7":
+				dmg7 = child;
+				break;
+			case "damage8":
+				dmg8 = child;
+				break;
 			}
 		}
 		canvas_text.gameObject.SetActive (false);	//hides canvas_text
@@ -135,23 +165,63 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 		OptionsMenu = GameObject.Find("OptionsMenu");
 		OptionsMenu.SetActive(false);
 
+		PlayerPositions = GameObject.FindGameObjectsWithTag ("PlayerPosition");
+		foreach (GameObject child in PlayerPositions) 
+		{
+			if (child.name == "Position1")
+				p_pos1 = child;
+			else if (child.name == "Position2")
+				p_pos2 = child;
+			else if (child.name == "Position3")
+				p_pos3 = child;
+			else if (child.name == "Position4")
+				p_pos4 = child;
+		}
+
+		EnemyPositions = GameObject.FindGameObjectsWithTag ("EnemyPosition");
+		foreach (GameObject child in EnemyPositions) 
+		{
+			if (child.name == "MonsterPosition1")
+				e_pos1 = child;
+			else if (child.name == "MonsterPosition2")
+				e_pos2 = child;
+			else if (child.name == "MonsterPosition3")
+				e_pos3 = child;
+			else if (child.name == "MonsterPosition4")
+				e_pos4 = child;
+		}
+
+		
 	}
 
 	// Update is called once per frame
 	void Update () 
 	{
-		//switch between turns
-		desc_text.text = current_stats.Name + "'s Turn";
-		Debug.Log ("Current State: " + curr_state);
 		//Debug.Log("turn_order size: " + turn_order.Count());
-		current_stats.defending = false;
-		if (current_stats.Playable) 
+		Debug.Log ("Current State: " + curr_state);
+
+		//switch between turns
+		if (curr_state == states.WAITING) 
 		{
-			//go up the menu
+			if (!waiting) 
+			{
+				waiting = true;
+				StartCoroutine (WaitASec ());
+//				foreach (Text child in texts) 
+//				{
+//					if (child.name.Substring (0, 3) == "dmg")
+//						child.text = "";
+//				}
+			}
+		}
+		else if(current_stats.Playable && curr_state != states.WAITING) 
+		{
+			desc_text.text = current_stats.Name + "'s Turn";
+			current_stats.defending = false;
 			OptionsMenu.SetActive(true);
 			if (curr_state == states.NULL) 
 			{
-				Debug.Log ("Switched from NULL to ATTACK");
+				//Debug.Log ("Switched from NULL to ATTACK");
 				curr_state = states.ATTACK;
 				OptionsMenu.SetActive(true);
 				ATTACK_Button.interactable = true;
@@ -175,9 +245,10 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 				{
 				case states.ATTACK:
 					{
-						//target = Select();
+						ATTACK_Button.interactable = false;
 						desc_text.text = current_stats.Name + " attacks " + MonsterStats.Name + "!";
-						current_stats.Attack (MonsterStats);
+						//current_stats.Attack (MonsterStats);
+						DisplayDamage (5, current_stats.Attack (MonsterStats));
 						break;
 					}
 				case states.DEFEND:
@@ -202,20 +273,24 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 						break;
 					}
 				}	//end: switch
-				if (curr_state == states.ATTACK)
-					ATTACK_Button.interactable = false;
-				curr_state = states.NULL;
-				OptionsMenu.SetActive(false);
+//				if (curr_state == states.ATTACK)
+//					ATTACK_Button.interactable = false;
+				//curr_state = states.NULL;
 				current_stats = turn_order.ElementAt (++ListIndex);
+				curr_state = states.WAITING;
 			}	//end: else if(Input.GetButtonDown("Submit"))
 		}	//end: if (current_stats.Playable) 
-		else 
+		else if(!current_stats.Playable && curr_state != states.WAITING)
 		{
 			//Monster's turn
-			current_stats.Attack (PlayerStats);
-			//damage display
+			desc_text.text = current_stats.Name + "'s Turn";
+			current_stats.defending = false;
+			//current_stats.Attack (PlayerStats);
+			desc_text.text = MonsterStats.Name + " attacks " + PlayerStats.Name + "!";
+			DisplayDamage (1, current_stats.Attack (PlayerStats));
 			++ListIndex;	//because properties sucks
 			current_stats = turn_order.ElementAt (ListIndex);
+			curr_state = states.WAITING;
 		}
 
 		//update texts
@@ -279,27 +354,20 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 	/// </summary>
 	public void DisplayDamage(int pos, int damage)
 	{
-		//Debug.Log ("Displayed damage");
 		switch (pos) 
 		{
 		case 1:
 			{
 				dmg1.text = damage.ToString ();
+				StartCoroutine (Wait (1, dmg1));
+				//dmg1.text = "";
 				break;
 			}
-		case 2:
+		case 5:
 			{
-				dmg2.text = damage.ToString ();
-				break;
-			}
-		case 3:
-			{
-				dmg3.text = damage.ToString ();
-				break;
-			}
-		case 4:
-			{
-				dmg4.text = damage.ToString ();
+				dmg5.text = damage.ToString ();
+				StartCoroutine (Wait (1, dmg5));
+				//dmg5.text = "";
 				break;
 			}
 		default:
@@ -333,11 +401,8 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 			turn_order.Clear ();
 			PlayerStats = Player.Instance.GetComponent<Stats>();
 			MonsterStats = hit_monster.GetComponent<Stats> ();
-			//sets turn order and resets the ListIndex
 			turn_order.Add(PlayerStats);
 			turn_order.Add(MonsterStats);
-			//print(PlayerStats.Name);
-			//print(MonsterStats.Name);
 			turn_order = turn_order.OrderByDescending(x => x.Agility).ToList();
 			current_stats = turn_order.ElementAt(0);
 			ListIndex = 0;
@@ -360,8 +425,8 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 	private void EndBattle()
 	{
 		SoundManager.Instance.SetMusic(ResourceManager.Instance.GetSound("CastleMusic"));
-		if (curr_state == states.ATTACK)
-			ATTACK_Button.interactable = false;
+		ATTACK_Button.interactable = false;
+		waiting = false;
 		curr_state = states.NULL;
 		gameObject.SetActive(false);
 		turn_order.Clear(); //clear the turn order list for the next encournter
@@ -372,11 +437,23 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 	}
 
 	/// <summary>
-	/// Wait for 1 sec
+	/// Waits for a few secs
 	/// </summary>
 	IEnumerator WaitASec()
 	{
+		OptionsMenu.SetActive (false);
 		yield return new WaitForSeconds (1);
+		curr_state = states.NULL;
+		waiting = false;
+	}
+
+	/// <summary>
+	/// Waits for specified number of secs
+	/// </summary>
+	IEnumerator Wait(int sec, Text text)
+	{
+		yield return new WaitForSeconds (sec);
+		text.text = "";
 	}
 
 	/// <summary>
@@ -385,7 +462,9 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 	IEnumerator BattleEscape()
 	{
 		Debug.Log ("Escape triggered");
-		desc_text.gameObject.SetActive(false);
+		//yield return new WaitForSeconds (2);
+		//desc_text.gameObject.SetActive(false);
+		desc_text.text = "";
 		if (current_stats.Agility >= 2 * 5) 	//5 is a placeholder value
 		{
 			//OptionsMenu.SetActive (false);
