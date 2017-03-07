@@ -18,7 +18,6 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 	public Monster Monster;
 	public Stats PlayerStats;
 	public Stats MonsterStats;
-	//public Text DamageText;
 	private Canvas BattleCanvas;
 
 	private Text[] texts;		//for getting an array of texts of which are children to the BattleCanvas
@@ -47,7 +46,7 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 	private GameObject e_pos3;
 	private GameObject e_pos4;
 
-	//Dictionary<int, > posMap;
+	//Dictionary<int, Stats> posMap;
 
 	private Button[] buttons;
 	private Button ATTACK_Button;
@@ -61,6 +60,8 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 	private List<Stats> turn_order = new List<Stats>();	//list that will be ordered to keep track of turn order
 	private Stats current_stats;						//the current stat taking its turn in combat
 	private bool waiting = false;
+	private bool running = false;
+	private bool escaped = false;
 
 	//ListIndex property: keeps track of whose turn it is in battle
 	private int _ListIndex = 0;
@@ -76,7 +77,7 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 	}
 
 	//option states
-	public enum states {NULL = 0, ATTACK = 1, DEFEND = 2, SKILLS = 3, ITEMS = 4, RUN = 5, TARGETING = 9, WAITING = 10};
+	public enum states {NULL = 0, ATTACK = 1, DEFEND = 2, SKILLS = 3, ITEMS = 4, RUN = 5, TARGETING = 9, WAITING = 10, EXITING = 11};
 	private states curr_state;	//memorizes what is the current state the battle_canvas is in
 
 	protected override void Awake()
@@ -201,18 +202,16 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 		Debug.Log ("Current State: " + curr_state);
 
 		//switch between turns
-		if (curr_state == states.WAITING) 
+		if (curr_state == states.WAITING)
 		{
-			if (!waiting) 
-			{
+			if (!waiting) {
 				waiting = true;
 				StartCoroutine (WaitASec ());
-//				foreach (Text child in texts) 
-//				{
-//					if (child.name.Substring (0, 3) == "dmg")
-//						child.text = "";
-//				}
 			}
+		} 
+		else if (curr_state == states.EXITING)
+		{
+			Debug.Log ("Exiting Battle");
 		}
 		else if(current_stats.Playable && curr_state != states.WAITING) 
 		{
@@ -232,7 +231,6 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 				if (curr_state != states.ATTACK)
 					--curr_state;
 			}
-			//go down the menu
 			else if(Input.GetButtonDown("Vertical") && Input.GetAxisRaw("Vertical") < 0)	//down is pressed
 			{
 				if(curr_state != states.RUN)
@@ -247,7 +245,6 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 					{
 						ATTACK_Button.interactable = false;
 						desc_text.text = current_stats.Name + " attacks " + MonsterStats.Name + "!";
-						//current_stats.Attack (MonsterStats);
 						DisplayDamage (5, current_stats.Attack (MonsterStats));
 						break;
 					}
@@ -269,7 +266,9 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 				case states.RUN:
 					{
 						desc_text.text = "Attempting to run...";
-						StartCoroutine(BattleEscape());
+						running = true;
+						//StartCoroutine(BattleEscape());
+						BattleEscape();
 						break;
 					}
 				}	//end: switch
@@ -287,7 +286,7 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 			current_stats.defending = false;
 			//current_stats.Attack (PlayerStats);
 			desc_text.text = MonsterStats.Name + " attacks " + PlayerStats.Name + "!";
-			DisplayDamage (1, current_stats.Attack (PlayerStats));
+			DisplayDamage (1, current_stats.Attack (PlayerStats));	//attacks
 			++ListIndex;	//because properties sucks
 			current_stats = turn_order.ElementAt (ListIndex);
 			curr_state = states.WAITING;
@@ -359,15 +358,13 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 		case 1:
 			{
 				dmg1.text = damage.ToString ();
-				StartCoroutine (Wait (1, dmg1));
+				//StartCoroutine (Wait (1, dmg1));
 				//dmg1.text = "";
 				break;
 			}
 		case 5:
 			{
 				dmg5.text = damage.ToString ();
-				StartCoroutine (Wait (1, dmg5));
-				//dmg5.text = "";
 				break;
 			}
 		default:
@@ -437,49 +434,67 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 	}
 
 	/// <summary>
-	/// Waits for a few secs
+	/// Waits for a few secs to show text to player, then "turn off" text
+	/// TL;DR It's used for smooth transitioning between states after a move have been made
 	/// </summary>
 	IEnumerator WaitASec()
 	{
 		OptionsMenu.SetActive (false);
 		yield return new WaitForSeconds (1);
-		curr_state = states.NULL;
-		waiting = false;
-	}
-
-	/// <summary>
-	/// Waits for specified number of secs
-	/// </summary>
-	IEnumerator Wait(int sec, Text text)
-	{
-		yield return new WaitForSeconds (sec);
-		text.text = "";
+		foreach (Text child in texts) 
+		{
+			if (child.name.Substring(0, 3) == "dam") 
+			{
+				//Debug.Log (child.name);
+				child.text = "";
+			}
+		}
+		waiting = false;			//no longer waiting
+		curr_state = states.NULL;	//resets the state to NULL
+		if (running && escaped) 
+		{
+			curr_state = states.EXITING;
+			canvas_text.text = "ESCAPED!";
+			canvas_text.gameObject.SetActive (true);
+			yield return new WaitForSeconds (2);
+			canvas_text.gameObject.SetActive (false);
+			Monster.Pause(2f);
+			EndBattle();
+			//curr_state = states.EXITING;
+		} 
+		else if (running && !escaped)
+		{
+			canvas_text.text = "CANNOT ESCAPE!";
+			canvas_text.gameObject.SetActive (true);
+			yield return new WaitForSeconds (2);
+			canvas_text.gameObject.SetActive (false);
+		}
+		running = false;			//no longer running/trying to escape
 	}
 
 	/// <summary>
 	/// Exits the battle when the player loses
 	/// </summary>
-	IEnumerator BattleEscape()
+	//IEnumerator BattleEscape()
+	void BattleEscape()
 	{
-		Debug.Log ("Escape triggered");
-		//yield return new WaitForSeconds (2);
-		//desc_text.gameObject.SetActive(false);
-		desc_text.text = "";
+		Debug.Log ("Calculating escape");
 		if (current_stats.Agility >= 2 * 5) 	//5 is a placeholder value
 		{
-			//OptionsMenu.SetActive (false);
-			canvas_text.text = "ESCAPED!";
-			canvas_text.gameObject.SetActive (true);
-			yield return new WaitForSeconds (2);
-			canvas_text.gameObject.SetActive (false);
+			escaped = true;
+			//canvas_text.text = "ESCAPED!";
+//			canvas_text.gameObject.SetActive (true);
+//			yield return new WaitForSeconds (2);
+//			canvas_text.gameObject.SetActive (false);
 			//MonsterStats.gameObject.GetComponent<Monster>().Pause(2f);
-			Monster.Pause(2f);
-			EndBattle();
+			//Monster.Pause(2f);
+			//EndBattle();
 		} 
 		else 
 		{
-			canvas_text.text = "CANNOT ESCAPE!";
-			yield return new WaitForSeconds (2);
+			escaped = false;
+//			canvas_text.text = "CANNOT ESCAPE!";
+//			yield return new WaitForSeconds (2);
 		}
 	}
 
@@ -488,6 +503,7 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 	/// </summary>
 	IEnumerator BattleDefeat()
 	{
+		curr_state = states.EXITING;	//sets Update's state machine to EXITING
 		Debug.Log ("Defeat triggered");
 		desc_text.text = "";
 		canvas_text.text = "DEFEAT!";
@@ -503,6 +519,7 @@ public class OneVOneManager : Singleton<OneVOneManager> {
 	/// </summary>
 	IEnumerator BattleVictory()
 	{
+		curr_state = states.EXITING;	//sets Update's state machine to EXITING
 		Debug.Log ("Victory triggered");
 		desc_text.text = "";
 		canvas_text.text = "VICTORY!";
