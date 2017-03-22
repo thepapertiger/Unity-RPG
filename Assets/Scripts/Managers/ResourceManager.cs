@@ -57,6 +57,14 @@ public class ResourceManager : Singleton<ResourceManager> {
         }
     }
 
+    /// <summary>
+    /// Instantiates a character determined by the name
+    /// </summary>
+    public GameObject GetCharacter(string character_name)
+    {
+        return Instantiate(Resources.Load("Characters/" + character_name)) as GameObject;
+    }
+
     public ItemBase GetItem(string name)
     {
         if (ItemDict.ContainsKey(name)) {

@@ -11,9 +11,6 @@ using UnityEngine;
 
 public class Monster : MovingObject {
 
-	//[SerializeField]
-	public List<Stats> EnemyParty = new List<Stats> ();
-
     //public Stats MonsterStats;
     [Tooltip("Set whether this AI searches for the best path")]
     public bool Pathfinding;
@@ -73,21 +70,22 @@ public class Monster : MovingObject {
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.IsState(GameStates.IdleState)) {
+        transform.rotation = Quaternion.Euler(0, 0, 0);
+        // This is for timing of turn-based movement with Player
+        /*if (!GameManager.Instance.IsState(GameStates.IdleState)) {
             if (!GameManager.Instance.IsState(GameStates.PlayerMovingState))
                 NextActionTime = Time.time;
-        }
-        else {
+        }*/
+        //else {
             if (!IAmMoving && MySpot.position != transform.position)
                 MySpot.position = transform.position;
-            if (!Paused) { //only move when game is in idle mode and monster is not paused from fleeing battle
-                if (Time.time > NextActionTime) { //see if it is time to move again
-                    NextActionTime += MoveRate; //set the next time to move
+            if (!Paused && (GameManager.Instance.IsState(GameStates.IdleState) ||
+                    GameManager.Instance.IsState(GameStates.PlayerMovingState))) { //only move when game is in idle mode and monster is not paused from fleeing battle
+            //    if (Time.time > NextActionTime) { //see if it is time to move again
+            //        NextActionTime += MoveRate; //set the next time to move
                     float sqr_magnitude = Vector3.SqrMagnitude(new Vector3((Target.position.x - transform.position.x), (Target.position.y - transform.position.y)));
-                    if (sqr_magnitude <= 1) {
-                        //BattleManager.Instance.Encounter(GetComponent<Stats>());
-						//BattleManager.Instance.Encounter(this);
-						OneVOneManager.Instance.Encounter(this);
+                    if (sqr_magnitude <= 1.5) {
+                        BattleManager.Instance.Encounter(this);
                     }
                     else if (sqr_magnitude <= (Radius * Radius) && !IAmMoving) {
                         if (!Pathfinding)
@@ -95,9 +93,9 @@ public class Monster : MovingObject {
                         else
                             DetectPlayerAStar();
                     }
-                }
+        //        }
             }
-        }
+        //}
     }
 
     /// <summary>
@@ -120,7 +118,7 @@ public class Monster : MovingObject {
         {
             //start battle screen, get component of the battle game object, or maybe the game manager will handle this
             Debug.Log("Monster wants to battle!");
-            BattleManager.Instance.Encounter(EnemyParty);
+            BattleManager.Instance.Encounter(this.GetComponent<Stats>());
         }
     }
     */
@@ -192,10 +190,12 @@ public class Monster : MovingObject {
         endGridPosition = new MyPathNode(
             (int)(Target.transform.position.x-GridOrigin.x), (int)(Target.transform.position.y-GridOrigin.y), false);
         findUpdatedPath(currentGridPosition.x, currentGridPosition.y);
+        
         if (NextGridNode.x != currentGridPosition.x)
             x_dir = NextGridNode.x > currentGridPosition.x ? 1 : -1;
-        else if (NextGridNode.y != currentGridPosition.y)
+        if (NextGridNode.y != currentGridPosition.y)
             y_dir = NextGridNode.y > currentGridPosition.y ? 1 : -1;
+
         if (!MyAudioSource.isPlaying)
             SoundManager.Instance.RandomizeSfx(MonsterSound, MyAudioSource);
         AttemptMove<Player>(x_dir, y_dir);

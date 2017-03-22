@@ -19,6 +19,7 @@ public class Player : MovingObject
     protected Player() { } //constructor cannot be used - is null
 
     public int Chips = 100;
+    public Transform EllaModel;
 
     private static Player BackingInstance; //the backing variable for singleton pattern
 	private static object LockObject = new object ();
@@ -28,8 +29,9 @@ public class Player : MovingObject
 	private Stats player_stats;
     private Vector2 Front = Vector2.down; //indicates the direction the player is facing
     private float PlayerVelocity = 0;
+    private Quaternion CurRotation;
 
-//#####################   MOVE THIS TO PLACE WHERE STATS ARE UPDATED #######################################
+//#####################   PARTY STUFF #######################################
     public Transform PartyDisplay;
     public List<GameObject> Party = new List<GameObject>();
 
@@ -56,29 +58,32 @@ public class Player : MovingObject
         for (int i = 0; i < PartyDisplay.childCount; i++) { //for each child block
             blocks[i].SetActive(false); //deactivate
         }
-        //put data from each party
-        for (int j = 0; j < Party.Count; j++) {
-            current_stats = Party[j].GetComponent<Stats>();
-            blocks[j].GetComponent<MenuPartyBlock>().MyStats = current_stats;
-            //access each child display object and update it
-            blocks[j].transform.FindChild("Sprite").GetComponent<Image>().sprite = current_stats.SmallSprite;
-            blocks[j].transform.FindChild("Name").GetComponent<Text>().text = current_stats.Name;
-            //health bars, etc.
-            blocks[j].transform.FindChild("SliderHP").GetComponent<Slider>().value = current_stats.HP * 1.0f / current_stats.MaxHP;
-            blocks[j].transform.FindChild("SliderMP").GetComponent<Slider>().value = current_stats.MP * 1.0f / current_stats.MaxMP;
-            blocks[j].transform.FindChild("SliderEXP").GetComponent<Slider>().value = current_stats.EXP * 1.0f / current_stats.EXPNeeded;
-            //numerical stats
-            blocks[j].transform.FindChild("HP").GetComponent<Text>().text = current_stats.HP + "/" + current_stats.MaxHP;
-            blocks[j].transform.FindChild("MP").GetComponent<Text>().text = current_stats.MP + "/" + current_stats.MaxMP;
-            blocks[j].transform.FindChild("EXP").GetComponent<Text>().text = current_stats.EXP + "/" + current_stats.EXPNeeded;
-            blocks[j].transform.FindChild("Level").GetComponent<Text>().text = "Level   " + current_stats.Level;
-			blocks[j].transform.FindChild("ATK").GetComponent<Text>().text = current_stats.Strength.ToString();
-            blocks[j].transform.FindChild("DEF").GetComponent<Text>().text = current_stats.Defense.ToString();
-            blocks[j].transform.FindChild("AGL").GetComponent<Text>().text = current_stats.Agility.ToString();
-            blocks[j].SetActive(true);
+        if (Party.Count > 0) {
+            //put data from each party
+            for (int j = 0; j < Party.Count; j++) {
+                blocks[j].GetComponent<MenuPartyBlock>().Character = Party[j];
+                blocks[j].GetComponent<MenuPartyBlock>().MyStats = Party[j].GetComponent<Stats>();
+                current_stats = Party[j].GetComponent<Stats>();                
+                //access each child display object and update it
+                blocks[j].transform.FindChild("Sprite").GetComponent<Image>().sprite = current_stats.SmallSprite;
+                blocks[j].transform.FindChild("Name").GetComponent<Text>().text = current_stats.Name;
+                //health bars, etc.
+                blocks[j].transform.FindChild("SliderHP").GetComponent<Slider>().value = current_stats.HP * 1.0f / current_stats.MaxHP;
+                blocks[j].transform.FindChild("SliderMP").GetComponent<Slider>().value = current_stats.MP * 1.0f / current_stats.MaxMP;
+                blocks[j].transform.FindChild("SliderEXP").GetComponent<Slider>().value = current_stats.EXP * 1.0f / current_stats.EXPNeeded;
+                //numerical stats
+                blocks[j].transform.FindChild("HP").GetComponent<Text>().text = current_stats.HP + "/" + current_stats.MaxHP;
+                blocks[j].transform.FindChild("MP").GetComponent<Text>().text = current_stats.MP + "/" + current_stats.MaxMP;
+                blocks[j].transform.FindChild("EXP").GetComponent<Text>().text = current_stats.EXP + "/" + current_stats.EXPNeeded;
+                blocks[j].transform.FindChild("Level").GetComponent<Text>().text = "Level   " + current_stats.Level;
+                blocks[j].transform.FindChild("STR").GetComponent<Text>().text = current_stats.Strength.ToString();
+                blocks[j].transform.FindChild("DEF").GetComponent<Text>().text = current_stats.Defense.ToString();
+                blocks[j].transform.FindChild("AGL").GetComponent<Text>().text = current_stats.Agility.ToString();
+                blocks[j].SetActive(true);
+            }
         }
     }
-//##########################################################################################################
+//################################################# END PARTY STUFF ###################################################
 
     protected override void Awake()
     {
@@ -98,6 +103,8 @@ public class Player : MovingObject
 
     void Update()
     {
+        CurRotation = transform.rotation;
+        transform.rotation = Quaternion.Euler(CurRotation.eulerAngles.x, CurRotation.eulerAngles.y, 0);
         if (GameManager.Instance.IsState(GameStates.IdleState) && IAmMoving) {
             GameManager.Instance.SetState(GameStates.PlayerMovingState);
             animator.SetBool("IAmMoving", IAmMoving);
@@ -106,13 +113,17 @@ public class Player : MovingObject
             GameManager.Instance.SetState(GameStates.IdleState);
             animator.SetBool("IAmMoving", IAmMoving);
         }
-            
-        if (!GameManager.Instance.IsState(GameStates.IdleState))
-            return;
 
+        if (!GameManager.Instance.IsState(GameStates.IdleState)) {
+            animator.speed = 0;
+            return;
+        }
+
+        /*
         //Battle Scene Debugger
         if (Input.GetButtonDown("Fire1"))
-			BattleManager.Instance.Encounter(BattleManager.Instance.Monster);
+            BattleManager.Instance.Encounter(this);
+        */
 
         int horizontal = 0;
         int vertical = 0;
@@ -121,37 +132,45 @@ public class Player : MovingObject
         horizontal = (int)Input.GetAxisRaw("Horizontal");
         vertical = (int)Input.GetAxisRaw("Vertical");
 
-        if (horizontal != 0) //go horzontal only for diagonal input
-            vertical = 0;
+            /* This disallows diagonal movement
+            if (horizontal != 0) //go horzontal only for diagonal input
+                vertical = 0;
+            */
 
-        //execute the following only if directional input
-        if (horizontal != 0 || vertical != 0) {
-            //determine which direction to show the sprite
-            if (horizontal == 0 && vertical > 0) {
-                if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerUp"))
-                    animator.SetTrigger("PlayerUp"); //set the sprite to face up
-                Front = Vector2.up; //set front to be "up"
-            }
-            else if (horizontal == 0 && vertical < 0) {
-                if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerDown"))
-                    animator.SetTrigger("PlayerDown");
-                Front = Vector2.down;
-            }
-            else if (horizontal > 0 && vertical == 0) {
-                if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerRight"))
-                    animator.SetTrigger("PlayerRight");
-                Front = Vector2.right;
-            }
-            else if (horizontal < 0 && vertical == 0) {
-                if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerLeft"))
-                    animator.SetTrigger("PlayerLeft");
-                Front = Vector2.left;
-            }
-            //attempt to move with user's input
-            AttemptMove<Monster>(horizontal, vertical);
+            //execute the following only if directional input
+            if (horizontal != 0 || vertical != 0) {
+                animator.speed = 1.5f;
+                //determine which direction to show the sprite
+                if (horizontal == 0 && vertical > 0) {
+                    if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerUp"))
+                        animator.SetTrigger("PlayerUp"); //set the sprite to face up
+                    Front = Vector2.up; //set front to be "up"
+                }
+                else if (horizontal == 0 && vertical < 0) {
+                    if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerDown"))
+                        animator.SetTrigger("PlayerDown");
+                    Front = Vector2.down;
+                }
+                else if (horizontal > 0 && vertical == 0) {
+                    if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerRight"))
+                        animator.SetTrigger("PlayerRight");
+                    Front = Vector2.right;
+                }
+                else if (horizontal < 0 && vertical == 0) {
+                    if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerLeft"))
+                        animator.SetTrigger("PlayerLeft");
+                    Front = Vector2.left;
+                }
+
+                //rotate Ella to face direction of motion
+                float angle = (Mathf.Atan2(-horizontal, -vertical) * Mathf.Rad2Deg);
+                EllaModel.localRotation =
+                    Quaternion.Slerp(EllaModel.localRotation, Quaternion.Euler(0, angle, 0), 20 * Time.deltaTime);
+                //attempt to move with user's input
+                AttemptMove<Monster>(horizontal, vertical);
         }
-        //if the spacebar is pressed
-        else if (Input.GetButtonDown("Accept")) {
+        else if (Input.GetButtonDown("Submit")) { //if the Enter is pressed
+            animator.speed = 0;
             //setup to send a raycast to detect if
             //there is an object in fron of player
             Vector2 start = transform.position;
@@ -164,10 +183,13 @@ public class Player : MovingObject
             if (hit.transform != null) //if something is in front
             {
                 Interactable hit_component = hit.transform.GetComponent<Interactable>();
-                if (hit_component)
+                if (hit_component) {
                     hit_component.Interact();
+                }
             }
         }
+        else
+            animator.speed = 0;
     }
     
     /// <summary>

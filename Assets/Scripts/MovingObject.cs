@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class MovingObject : MonoBehaviour {
+    public float Force = 1;
 
 	protected MovingObject () {} //prevents construction
 
@@ -41,7 +42,7 @@ public abstract class MovingObject : MonoBehaviour {
 	protected bool Move (int x_dir, int y_dir, out RaycastHit2D hit, Monster caller) {
 		Vector2 start = transform.position; //get current position
 		Vector2 end = start + new Vector2 (x_dir, y_dir); //the x_dir/y_dir are user input values 1, 0, or -1
-		
+        Vector2 force_direction = new Vector2(x_dir, y_dir);
 		BoxCollider.enabled = false; //avoid lincast from hitting this box collider
 		hit = Physics2D.Linecast(start, end, BlockingLayer); //see if there is somthing blocking
 		BoxCollider.enabled = true;  //renable after calculation
@@ -51,7 +52,7 @@ public abstract class MovingObject : MonoBehaviour {
 
         if (!IAmMoving) {
             IAmMoving = true;
-            StartCoroutine(SmoothMovement(end, caller));
+            StartCoroutine(SmoothMovement(force_direction, caller));
         }
         return true;
 	}
@@ -62,21 +63,26 @@ public abstract class MovingObject : MonoBehaviour {
 	protected IEnumerator SmoothMovement (Vector3 end, Monster caller) {
         if (caller != null) //activate the spot reserver for monsters
             caller.transform.GetChild(0).gameObject.SetActive(true);
+        
 		float sqr_remaining_dist = (transform.position - end).sqrMagnitude; //transform.position for v3 subtraction (Rigidbody2D=v2)
-		while (sqr_remaining_dist > float.Epsilon) { //float.Epsilon is ~~0, i guess to round the movement)
+		/*while (sqr_remaining_dist > float.Epsilon) { //float.Epsilon is ~~0, i guess to round the movement)
 			Vector3 new_position = Vector3.MoveTowards(Rigidbody2D.position, end, InverseMoveTime * Time.deltaTime);
-			/* MoveTime = (seconds/unit)
-			(Units/second)(passed time) = How many units moved 
-			repeat until Rigidbody2D.position is at end */
+			// MoveTime = (seconds/unit)
+			//(Units/second)(passed time) = How many units moved 
+			//repeat until Rigidbody2D.position is at end
 			Rigidbody2D.MovePosition (new_position);
 			sqr_remaining_dist = (transform.position - end).sqrMagnitude;
 			yield return null; //wait for a frame before loop reiteration
-		}
+		}*/
+       
+        GetComponent<Rigidbody2D>().AddForce(end * Force);
+
         if (caller != null) {
             //If a monster called, reset their spot placeholder
             caller.transform.GetChild(0).gameObject.SetActive(false);
         }
         IAmMoving = false;
+        yield return null; //temporary for mini demo
     }
 
 	/// <summary>
@@ -85,7 +91,7 @@ public abstract class MovingObject : MonoBehaviour {
 	/// </summary>
 	protected virtual void AttemptMove <T> (int x_dir, int y_dir)
 			where T : Component {
-	
+	    
 		RaycastHit2D hit;
 		bool canMove = Move (x_dir, y_dir, out hit, null);
 

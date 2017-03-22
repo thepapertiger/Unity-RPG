@@ -25,13 +25,14 @@ public class UIManager : Singleton<UIManager> {
     [SerializeField]
     protected Text DialogueInstructionRef;
     [SerializeField]
-    protected string DialogueInstruction = "<Press Space>";
+    protected string DialogueInstruction = "<Press Enter>";
     [SerializeField]
     protected Text QandATextRef;
     [SerializeField]
     protected Text QandAInstructionRef;
     [SerializeField]
     protected string QandAInstruction = "<Click Answer>";
+    public Image AddedItemFrame;
     public GameObject DialogueView;
     public GameObject QandAView;
     public GameObject[] AnswerButtons;
@@ -44,7 +45,9 @@ public class UIManager : Singleton<UIManager> {
     public MainMenuButton MainMenuButtonScript;
     public GameObject BackgroundBlur;
     public GameObject MenuCanvas;
-    public GameObject[] ScrollViews;
+    public GameObject PartyDisplay;
+    public Sprite ButtonSpriteGlowing;
+    public RectTransform[] ScrollViews;
     [Space(10)]
 
     [Header("Menu List Areas References")]
@@ -57,6 +60,7 @@ public class UIManager : Singleton<UIManager> {
     public GameObject ExitPopUp;
     public Text LastSaveTime;
     public Text LastSaveLocation;
+    [HideInInspector]
     public bool IsDraggingItem = false;
     [Space(10)]
 
@@ -71,6 +75,15 @@ public class UIManager : Singleton<UIManager> {
     public Text MainMenuDetailsText;
     public GameObject TossItemButton;
     public GameObject TossItemPopUp;
+    public GameObject UnequipPopUp;
+    [HideInInspector]
+    public GameObject SelectedCharacter;
+    [HideInInspector]
+    public EquipSlots SelectedEquipSlot;
+    [HideInInspector]
+    public MenuPartyBlock SelectedBlock;
+    public GameObject EquipList;
+    public List<Text> EquipListTexts = new List<Text>();
     private ItemBase _SelectedItem;
     [SerializeField]
     private ScrollRect ItemScrollRect;
@@ -105,9 +118,26 @@ public class UIManager : Singleton<UIManager> {
     /// </summary>
     public void ResetScrolls()
     {
-        foreach (GameObject scroll in ScrollViews) {
-            scroll.GetComponent<RectTransform>().localPosition = Vector2.zero;
+        foreach (RectTransform scroll in ScrollViews) {
+            scroll.localPosition = Vector2.zero;
         }
+    }
+
+    /// <summary>
+    /// Deactivates all Menu UI associated with a selected item
+    /// </summary>
+    public void DeselectCharacter()
+    {
+        SelectedCharacter = null;
+        EquipList.SetActive(false);
+    }
+
+    /// <summary>
+    /// Deactivates all Menu UI associated with a selected character
+    /// </summary>
+    public void DeselectItem()
+    {
+        UIManager.Instance.SelectedItem = null;
     }
 
     /// <summary>
@@ -116,11 +146,12 @@ public class UIManager : Singleton<UIManager> {
     public void CloseMainMenu()
     {
         if (GameManager.Instance.IsState(GameStates.MainMenuState)) {
-            UIManager.Instance.ResetScrolls();
-            UIManager.Instance.SelectedItem = null;
-            UIManager.Instance.ExitPopUp.SetActive(false);
-            UIManager.Instance.TossItemPopUp.SetActive(false);
-            UIManager.Instance.MenuCanvas.SetActive(false);
+            ResetScrolls();
+            SelectedItem = null;
+            ExitPopUp.SetActive(false);
+            TossItemPopUp.SetActive(false);
+            DeselectCharacter();
+            MenuCanvas.SetActive(false);
             GameManager.Instance.SetState(GameStates.IdleState);
         }
     }
@@ -131,8 +162,9 @@ public class UIManager : Singleton<UIManager> {
     /// </summary>
     public void SwitchArea(GameObject new_area)
     {
-        //clear current item selection
-        UIManager.Instance.SelectedItem = null;
+        //clear current selections
+        DeselectItem();
+        DeselectCharacter();
 
         if (new_area == InventoryArea)
             TossItemButton.SetActive(true);
@@ -194,41 +226,30 @@ public class UIManager : Singleton<UIManager> {
 
     private void Start()
     {
-        /*
-        DialogueCanvas = GameObject.Find("DialogueCanvas");
-        DialogueTextRef = GameObject.Find("DialogueText").GetComponent<Text>();
-        DialogueInstructionRef = GameObject.Find("DialogueInstruction").GetComponent<Text>();
-        MenuCanvas = GameObject.Find("MenuCanvas");
-        MainMenuButton = GameObject.FindObjectOfType<MainMenuButton>().GetComponent<Button>();
-        GoodiesGrid = GameObject.Find("GoodiesGrid");
-        WeaponsGrid = GameObject.Find("WeaponsGrid");
-        GearGrid = GameObject.Find("GearGrid");
-        MaterialsGrid = GameObject.Find("MaterialsGrid");
-        KeysGrid = GameObject.Find("KeysGrid");
-        ItemSelectGlow = GameObject.Find("ItemSelectGlow");
-        MainMenuDetailsImage = GameObject.Find("DetailsImage").GetComponent<Image>();
-        MainMenuDetailsText = GameObject.Find("DetailsText").GetComponent<Text>(); 
-        */
         ItemSelectGlow.SetActive(false);
         TossItemPopUp.SetActive(false);
+        TossItemPopUp.SetActive(false);
+        UnequipPopUp.SetActive(false);
         ActiveGrid = GoodiesGrid;
         WeaponsGrid.SetActive(false);
         GearGrid.SetActive(false);
         MaterialsGrid.SetActive(false);
         KeysGrid.SetActive(false);
         DialogueCanvas.SetActive(false); //dialogue is inactive when game starts
+        AddedItemFrame.gameObject.SetActive(false); //a reference to the frame whose childs' image should be changed
         MenuCanvas.SetActive(false);
         ActiveArea = PartyArea;
         InventoryArea.SetActive(false);
         SynopsisArea.SetActive(false);
         SaveArea.SetActive(false);
         OptionsArea.SetActive(false);
+        EquipList.SetActive(false);
     }
 
         void Update()
     {
         //stops printing if currently printing and player wishes to skip
-        if (IsPrinting && Input.GetButtonDown("Accept")) {
+        if (IsPrinting && Input.GetButtonDown("Submit")) {
             SkipAnimation = true;
         }
         //check if next message should be displayed
@@ -288,9 +309,11 @@ public class UIManager : Singleton<UIManager> {
 
         DialogueInstructionRef.text = DialogueInstruction; //display message to go to next dialogue
         yield return null; //wait a frame to let ButtonDown reset
-        while (!Input.GetButtonDown("Accept")) {
+        while (!Input.GetButtonDown("Submit")) {
             yield return null; //wait for user to finish reading, and push "accept"
         }
+        if (UIManager.Instance.AddedItemFrame.gameObject.activeSelf)
+            UIManager.Instance.AddedItemFrame.gameObject.SetActive(false);
         DialogueTextRef.text = "";
         DialogueInstructionRef.text = "";
         CoroutineRunning = false;
@@ -305,6 +328,7 @@ public class UIManager : Singleton<UIManager> {
     /// </summary>
     IEnumerator PrintQandA(Interactable caller, List<string> message)
     {
+        ResetScrolls();
         DialogueView.SetActive(false);
         QandAView.SetActive(true);
         int string_length = message[0].Length; //save length
@@ -355,5 +379,6 @@ public class UIManager : Singleton<UIManager> {
     public void SelectAnswer(int selection)
     {
         AnswerSelected = selection;
+        ResetScrolls();
     }
 }

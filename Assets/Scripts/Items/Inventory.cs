@@ -112,7 +112,7 @@ public class Inventory : Singleton<Inventory> {
         ItemTypes item_type = item_base.Type;
         Dictionary<string, int> update_dict;
         GameObject update_grid;
-        switch (item_type) {
+        switch (item_type) { //get proper references based on item type
             case ItemTypes.Consumable:
                 update_dict = Consumables;
                 update_grid = UIManager.Instance.GoodiesGrid;
@@ -135,14 +135,15 @@ public class Inventory : Singleton<Inventory> {
                 break;
         }
         if (update_dict.ContainsKey(item_name)) {
-            if ((update_dict[item_name] - quantity) <= 0) {
+            if ((update_dict[item_name] - quantity) <= 0) { //if less than 0, set to 0
                 update_dict[item_name] = 0;
             }
             else {
-                update_dict[item_name] -= quantity;
+                update_dict[item_name] -= quantity; //otherwise subtract quantity
             }
-            if (update_dict[item_name] <= 0) {
+            if (update_dict[item_name] <= 0) { //if there are not more of this item in inventory
                 update_dict.Remove(item_name);
+                UIManager.Instance.ItemSelectGlow.SetActive(false);
             }
             UpdateItemGrids(update_dict, update_grid);
         }

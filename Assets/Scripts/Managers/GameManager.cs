@@ -20,16 +20,21 @@ using System.Collections;
 using System.Collections.Generic; //for lists
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 //Global enum. The possible game states set in the animator state machine.
-public enum GameStates {IdleState, PlayerMovingState, DialogueState, BattleState, MainMenuState};
+public enum GameStates {IntroState, IdleState, PlayerMovingState, DialogueState, BattleState, MainMenuState};
 
 public class GameManager : Singleton<GameManager> {
+
+    //for demo
+    public GameObject Overall;
+    public List<Sprite> CutScenes = new List<Sprite>();
+    public int index = 0;
+    public GameObject WorldCanvas;
+
     //gamemanager
     protected GameManager() { } //constructor cannot be used - is null
-
-	//party of characters
-	public List<GameObject> Party;
 
     private Animator GameState; //The game state machine (see notes in header)
     private HashSet<string> ItemReceivedRecords = new HashSet<string>();
@@ -83,7 +88,34 @@ public class GameManager : Singleton<GameManager> {
         GameState = this.GetComponent<Animator>();
         base.Awake();
     }
-    
+
+    private void Start()
+    {
+        Player.Instance.Party.Add(ResourceManager.Instance.GetCharacter("Ella"));
+        Player.Instance.Party.Add(ResourceManager.Instance.GetCharacter("Darius"));
+        Player.Instance.Party.Add(ResourceManager.Instance.GetCharacter("Gunther"));
+        Player.Instance.Party.Add(ResourceManager.Instance.GetCharacter("Margarethe"));
+        //WorldCanvas.SetActive(false);
+    }
+
+    /*
+    private void Update()
+    {
+        if (IsState(GameStates.IntroState) && Input.GetButtonDown("Submit") && index < 5) {
+            if (index == 0)
+                SoundManager.Instance.SetMusic(ResourceManager.Instance.GetSound("WeddingSong"));
+            Overall.GetComponent<Image>().sprite = CutScenes[index];
+            index++;
+        }
+        if (IsState(GameStates.IntroState) && Input.GetButtonDown("Submit") && index > 4) {
+            SoundManager.Instance.SetMusic(ResourceManager.Instance.GetSound("CastleMusic"));
+            Overall.SetActive(false);
+            SetState(GameStates.IdleState);
+            WorldCanvas.SetActive(true);
+        }
+    }
+    */
+
     /// <summary>
     /// This is the function to check whether the current game state
     /// is a certain game state from the "GameStates" enum.j

@@ -17,6 +17,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public abstract class Interactable : MonoBehaviour
 {
@@ -73,7 +74,8 @@ public abstract class Interactable : MonoBehaviour
     protected void QuitDialogue()
     {
         UIManager.Instance.DialogueCanvas.SetActive(false);
-        GameManager.Instance.SetState(GameStates.IdleState);
+        if (GameManager.Instance.IsState(GameStates.DialogueState))
+            GameManager.Instance.SetState(GameStates.IdleState);
     }
 
     /// <summary>
@@ -83,6 +85,9 @@ public abstract class Interactable : MonoBehaviour
     public static void AddItem(Interactable caller, string item_name,int quantity = 1) 
     {
         int result = Inventory.Instance.AddItem(item_name, quantity);
+        UIManager.Instance.AddedItemFrame.gameObject.SetActive(true);
+        UIManager.Instance.AddedItemFrame.transform.GetChild(0).GetComponent<Image>().sprite =
+            ResourceManager.Instance.GetItem(item_name).Sprite;
         string message = "You got " + item_name;
 
         if (quantity > 1) //only display quantity if > 1
