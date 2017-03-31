@@ -13,6 +13,7 @@ public class Monster : MovingObject {
 
 	//[SerializeField]
 	public List<Stats> EnemyParty = new List<Stats> ();
+	public Canvas BattleCanvas;
 
     //public Stats MonsterStats;
     [Tooltip("Set whether this AI searches for the best path")]
@@ -86,8 +87,9 @@ public class Monster : MovingObject {
                     float sqr_magnitude = Vector3.SqrMagnitude(new Vector3((Target.position.x - transform.position.x), (Target.position.y - transform.position.y)));
                     if (sqr_magnitude <= 1) {
                         //BattleManager.Instance.Encounter(GetComponent<Stats>());
+						BattleCanvas.GetComponent<BattleManager>().Encounter(this);
 						//BattleManager.Instance.Encounter(this);
-						OneVOneManager.Instance.Encounter(this);
+						//OneVOneManager.Instance.Encounter(this);
                     }
                     else if (sqr_magnitude <= (Radius * Radius) && !IAmMoving) {
                         if (!Pathfinding)

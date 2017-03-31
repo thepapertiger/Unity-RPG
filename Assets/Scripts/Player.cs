@@ -18,6 +18,7 @@ public class Player : MovingObject
 {
     protected Player() { } //constructor cannot be used - is null
 
+	public Canvas BattleCanvas;
     public int Chips = 100;
 
     private static Player BackingInstance; //the backing variable for singleton pattern
@@ -111,9 +112,10 @@ public class Player : MovingObject
             return;
 
         //Battle Scene Debugger
-        if (Input.GetButtonDown("Fire1"))
-			BattleManager.Instance.Encounter(BattleManager.Instance.Monster);
-
+		if (Input.GetButtonDown ("Fire1")) {
+			BattleManager.Instance.Encounter (BattleManager.Instance.Monster);
+			//BattleCanvas.GetComponent<BattleManager>().Encounter(Monster);
+		}
         int horizontal = 0;
         int vertical = 0;
 
