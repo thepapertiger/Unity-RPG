@@ -11,6 +11,10 @@ using UnityEngine;
 
 public class Monster : MovingObject {
 
+    //[SerializeField]
+    public List<Stats> EnemyParty = new List<Stats>();
+    public Canvas BattleCanvas;
+
     //public Stats MonsterStats;
     [Tooltip("Set whether this AI searches for the best path")]
     public bool Pathfinding;
@@ -32,6 +36,8 @@ public class Monster : MovingObject {
     private Transform MySpot;
     private AudioClip MonsterSound;
     private AudioSource MyAudioSource;
+
+    private bool waiting = false;
 
     /// <summary>
     /// Pauses the monster when the player flees to give him a chance to escape.
@@ -67,10 +73,18 @@ public class Monster : MovingObject {
         MySpot.gameObject.SetActive(false);
     }
 
+    IEnumerator wait()
+    {
+        yield return new WaitForSeconds(0.1f);
+        waiting = false;
+    }
+
     // Update is called once per frame
     void Update()
     {
         transform.rotation = Quaternion.Euler(0, 0, 0);
+        if (waiting)
+            return;
         // This is for timing of turn-based movement with Player
         /*if (!GameManager.Instance.IsState(GameStates.IdleState)) {
             if (!GameManager.Instance.IsState(GameStates.PlayerMovingState))
@@ -85,8 +99,9 @@ public class Monster : MovingObject {
             //        NextActionTime += MoveRate; //set the next time to move
                     float sqr_magnitude = Vector3.SqrMagnitude(new Vector3((Target.position.x - transform.position.x), (Target.position.y - transform.position.y)));
                     if (sqr_magnitude <= 1.5) {
-                        BattleManager.Instance.Encounter(this);
-                    }
+                        //BattleManager.Instance.Encounter(this);
+                         BattleCanvas.GetComponent<BattleManager>().Encounter(this);
+            }
                     else if (sqr_magnitude <= (Radius * Radius) && !IAmMoving) {
                         if (!Pathfinding)
                             DetectPlayer();
@@ -96,6 +111,8 @@ public class Monster : MovingObject {
         //        }
             }
         //}
+        waiting = true;
+        StartCoroutine(wait());
     }
 
     /// <summary>

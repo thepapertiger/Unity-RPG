@@ -32,6 +32,9 @@ public class GameManager : Singleton<GameManager> {
     public List<Sprite> CutScenes = new List<Sprite>();
     public int index = 0;
     public GameObject WorldCanvas;
+    public Interactable IntroInteractable;
+    public bool CanSkip = false;
+    public RectTransform DialogueFrame;
 
     //gamemanager
     protected GameManager() { } //constructor cannot be used - is null
@@ -92,29 +95,38 @@ public class GameManager : Singleton<GameManager> {
     private void Start()
     {
         Player.Instance.Party.Add(ResourceManager.Instance.GetCharacter("Ella"));
-        Player.Instance.Party.Add(ResourceManager.Instance.GetCharacter("Darius"));
-        Player.Instance.Party.Add(ResourceManager.Instance.GetCharacter("Gunther"));
+        Player.Instance.Party.Add(ResourceManager.Instance.GetCharacter("Nikolai"));
+        Player.Instance.Party.Add(ResourceManager.Instance.GetCharacter("Nikolai's Twin"));
         Player.Instance.Party.Add(ResourceManager.Instance.GetCharacter("Margarethe"));
         //WorldCanvas.SetActive(false);
     }
-
-    /*
+    
+    
     private void Update()
     {
-        if (IsState(GameStates.IntroState) && Input.GetButtonDown("Submit") && index < 5) {
-            if (index == 0)
-                SoundManager.Instance.SetMusic(ResourceManager.Instance.GetSound("WeddingSong"));
-            Overall.GetComponent<Image>().sprite = CutScenes[index];
-            index++;
-        }
-        if (IsState(GameStates.IntroState) && Input.GetButtonDown("Submit") && index > 4) {
-            SoundManager.Instance.SetMusic(ResourceManager.Instance.GetSound("CastleMusic"));
-            Overall.SetActive(false);
-            SetState(GameStates.IdleState);
-            WorldCanvas.SetActive(true);
+        if (!UIManager.IsPrinting) {
+            if (IsState(GameStates.IntroState) && Input.GetButtonDown("Submit") && index <= 12) {
+                if (index == 0) {
+                    Overall.GetComponentInChildren<Text>().text = "";
+                    DialogueFrame.sizeDelta = new Vector2(700, 70);
+                    SoundManager.Instance.SetMusic(ResourceManager.Instance.GetSound("WeddingSong"));
+                    IntroInteractable.Interact();
+                }
+                if (index == 7)
+                    SoundManager.Instance.SetMusic(ResourceManager.Instance.GetSound("BattleMusic"));
+                Overall.GetComponent<Image>().sprite = CutScenes[index];
+                index++;
+            }
+            else if (IsState(GameStates.IntroState) && Input.GetButtonDown("Submit") && index > 12) {
+                SoundManager.Instance.SetMusic(ResourceManager.Instance.GetSound("CastleMusic"));
+                Overall.SetActive(false);
+                SetState(GameStates.IdleState);
+                WorldCanvas.SetActive(true);
+                DialogueFrame.sizeDelta = new Vector2(700, 100);
+            }
         }
     }
-    */
+    
 
     /// <summary>
     /// This is the function to check whether the current game state

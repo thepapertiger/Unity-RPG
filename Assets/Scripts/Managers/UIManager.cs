@@ -48,6 +48,8 @@ public class UIManager : Singleton<UIManager> {
     public GameObject PartyDisplay;
     public Sprite ButtonSpriteGlowing;
     public RectTransform[] ScrollViews;
+    public GameObject DialoguePics;
+    public Image TalkingCharacter;
     [Space(10)]
 
     [Header("Menu List Areas References")]
@@ -92,7 +94,8 @@ public class UIManager : Singleton<UIManager> {
     //internal variables
     private Queue<IEnumerator> MessageQueue = new Queue<IEnumerator>();
     private static bool CoroutineRunning = false; //tells whether coroutine is running
-    private static bool IsPrinting = false; //tells Update when printing is in progress
+    //TODO make private after demo hacking
+    public static bool IsPrinting = false; //tells Update when printing is in progress
     private static bool SkipAnimation = false; //tells corouines when user wants to skip
     private GameObject ActiveGrid;
 
@@ -244,12 +247,14 @@ public class UIManager : Singleton<UIManager> {
         SaveArea.SetActive(false);
         OptionsArea.SetActive(false);
         EquipList.SetActive(false);
+        DialoguePics.SetActive(false);
     }
 
         void Update()
     {
         //stops printing if currently printing and player wishes to skip
-        if (IsPrinting && Input.GetButtonDown("Submit")) {
+        //TODO remove this hacking for demo (canskip)
+        if (IsPrinting && Input.GetButtonDown("Submit") && GameManager.Instance.CanSkip) {
             SkipAnimation = true;
         }
         //check if next message should be displayed

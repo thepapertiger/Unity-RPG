@@ -18,6 +18,7 @@ public class Player : MovingObject
 {
     protected Player() { } //constructor cannot be used - is null
 
+    public Canvas BattleCanvas;
     public int Chips = 100;
     public Transform EllaModel;
 
@@ -94,7 +95,7 @@ public class Player : MovingObject
             DontDestroyOnLoad(BackingInstance);
             
             //initializations
-            animator = GetComponent<Animator>();
+            animator = EllaModel.gameObject.GetComponent<Animator>();
             player_stats = GetComponent<Stats>();
             //PlayerHP = MaxHP;
             base.Awake();
@@ -139,7 +140,7 @@ public class Player : MovingObject
 
             //execute the following only if directional input
             if (horizontal != 0 || vertical != 0) {
-                animator.speed = 1.5f;
+                animator.speed = 0.8f;
                 //determine which direction to show the sprite
                 if (horizontal == 0 && vertical > 0) {
                     if (!animator.GetCurrentAnimatorStateInfo(0).IsName("PlayerUp"))
@@ -174,7 +175,7 @@ public class Player : MovingObject
             //setup to send a raycast to detect if
             //there is an object in fron of player
             Vector2 start = transform.position;
-            Vector2 end = start + Front;
+            Vector2 end = start + (3 * Front);
 
             BoxCollider.enabled = false; //avoid detecting player
             RaycastHit2D hit = Physics2D.Linecast(start, end);
@@ -214,7 +215,15 @@ public class Player : MovingObject
     /// </summary>
     private void OnTriggerEnter2D(Collider2D collidee)
     {
-        //TODO: this is for entering doors to trigger a scene changeS
+        if (collidee.tag == "DungeonExit") {
+            transform.position = new Vector3(37.97f, -147.71f, -3f);
+        }
+        else if (collidee.tag == "DungeonEntrance") {
+            transform.position = new Vector3(41.74f, -207.02f, -3f);
+        }
+        if (collidee.gameObject.GetComponents<Interactable>() != null) {
+            collidee.gameObject.GetComponent<Interactable>().Interact();
+        }
     }
 
     /// <summary>

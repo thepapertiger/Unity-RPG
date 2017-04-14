@@ -73,7 +73,12 @@ public abstract class Interactable : MonoBehaviour
     /// </summary>
     protected void QuitDialogue()
     {
+        //TODO remove this hacking for demo
+        GameManager.Instance.DialogueFrame.sizeDelta = new Vector2(700, 100);
+        UIManager.Instance.DialoguePics.SetActive(false);
         UIManager.Instance.DialogueCanvas.SetActive(false);
+        GameManager.Instance.Overall.SetActive(false);
+        GameManager.Instance.CanSkip = true;
         if (GameManager.Instance.IsState(GameStates.DialogueState))
             GameManager.Instance.SetState(GameStates.IdleState);
     }
