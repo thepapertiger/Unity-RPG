@@ -101,7 +101,7 @@ public class GameManager : Singleton<GameManager> {
         //WorldCanvas.SetActive(false);
     }
     
-    
+    /* FOR DEMOS (runs cutscenes)
     private void Update()
     {
         if (!UIManager.IsPrinting) {
@@ -126,6 +126,7 @@ public class GameManager : Singleton<GameManager> {
             }
         }
     }
+    */
     
 
     /// <summary>
