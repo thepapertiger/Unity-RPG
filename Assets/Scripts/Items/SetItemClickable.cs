@@ -19,11 +19,14 @@ using UnityEngine.EventSystems;
 public class SetItemClickable : MonoBehaviour, 
     IPointerDownHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    public ItemBase MyItem = null;
-    private GameObject DragIcon;
+    public ItemBase MyItem = null; //the item this image represents
+    private GameObject DragIcon; //reference to actual image that is drag
+    private MenuPartyBlock[] PartyBlocks; //reference to all party blocks in menu
+    private Sprite LastBlockSprite; //the last sprite of the party block before making it glow (for undoing glow)
 
     void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
     {
+        UIManager.Instance.DeselectCharacter();
         UIManager.Instance.ItemSelectGlow.GetComponent<ItemSelectGlow>().MySelectedItem = this.transform;
         StartCoroutine(WaitFrame());
         //set sprite to show up in details image
@@ -50,7 +53,18 @@ public class SetItemClickable : MonoBehaviour,
         DragIcon.GetComponent<Image>().sprite = MyItem.Sprite;
         DragIcon.SetActive(true);
         UIManager.Instance.IsDraggingItem = true;
-        UIManager.Instance.PartyArea.SetActive(true);
+        if (MyItem.Type != ItemTypes.Key) {
+            PartyBlocks = UIManager.Instance.PartyDisplay.GetComponentsInChildren<MenuPartyBlock>();
+            foreach (MenuPartyBlock block in PartyBlocks) {
+                if (block.Equippable(MyItem)) {
+                    LastBlockSprite = block.GetComponent<Image>().sprite;
+                    block.GetComponent<Image>().sprite = UIManager.Instance.ButtonSpriteGlowing;
+                }
+                else
+                    block.GetComponent<Image>().color = new Color(0.8f, 0.8f, 0.8f);
+            }
+            UIManager.Instance.PartyArea.SetActive(true);
+        }
     }
 
     void IDragHandler.OnDrag(PointerEventData eventData)
@@ -61,8 +75,15 @@ public class SetItemClickable : MonoBehaviour,
     void IEndDragHandler.OnEndDrag(PointerEventData eventData)
     {
         DragIcon.SetActive(false);
-        UIManager.Instance.PartyArea.SetActive(false);
-        StartCoroutine(Wait());
+        if (MyItem.Type != ItemTypes.Key) {
+            UIManager.Instance.PartyArea.SetActive(false);
+            //remove block glows
+            foreach (MenuPartyBlock block in PartyBlocks) {
+                block.GetComponent<Image>().sprite = LastBlockSprite;
+                block.GetComponent<Image>().color = Color.white;
+            }
+            StartCoroutine(Wait());
+        }
     }
 
     /// <summary>

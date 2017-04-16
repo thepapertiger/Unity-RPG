@@ -14,16 +14,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public enum ItemTypes { Consumable, Weapon, Gear, Material, Key };
+public enum EquipSlots { None, Head, Hand, Torso, Legs, Extra };
 
 public class ItemBase : ScriptableObject {
-    
-    public Sprite Sprite;
 
     /// <summary>
     /// Name of item
     /// </summary>
     [SerializeField]
-    private string _Name = "<Use the Convention of 'Title Case'>";
+    private string _Name = "<Use 'Title Case'>";
     public string Name {
         get
         {
@@ -41,6 +40,36 @@ public class ItemBase : ScriptableObject {
         {
             return _Type;
         }
+    }
+
+    /// <summary>
+    /// The slot on the character that this equipment is placed, if the character has this slot available
+    /// The slots are: Head, LHand, RHand, Torso, Legs, and Extra.
+    /// </summary>
+    [SerializeField]
+    private EquipSlots _EquipSlot;
+    public EquipSlots EquipSlot {
+        get
+        {
+            return _EquipSlot;
+        }
+    }
+
+
+    /// <summary>
+    /// The minimum level you must have to equip this item
+    /// </summary>
+    /// 
+    [SerializeField, Range(1, 99)]
+    private int _MinimumLevel = 1;
+    public int MinimumLevel {
+        get { return _MinimumLevel; }
+        set {
+            if (value < 1)
+                _MinimumLevel = 1;
+            else
+                _MinimumLevel = value;
+            }
     }
 
     /// <summary>
@@ -156,4 +185,9 @@ public class ItemBase : ScriptableObject {
             return _Description;
         }
     }
+    
+    /// <summary>
+    /// The small Sprite diplayed in the menu.
+    /// </summary>
+    public Sprite Sprite;
 }

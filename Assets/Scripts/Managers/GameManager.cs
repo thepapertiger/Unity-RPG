@@ -20,16 +20,24 @@ using System.Collections;
 using System.Collections.Generic; //for lists
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 //Global enum. The possible game states set in the animator state machine.
-public enum GameStates {IdleState, PlayerMovingState, DialogueState, BattleState, MainMenuState};
+public enum GameStates {IntroState, IdleState, PlayerMovingState, DialogueState, BattleState, MainMenuState};
 
 public class GameManager : Singleton<GameManager> {
+
+    //for demo
+    public GameObject Overall;
+    public List<Sprite> CutScenes = new List<Sprite>();
+    public int index = 0;
+    public GameObject WorldCanvas;
+    public Interactable IntroInteractable;
+    public bool CanSkip = false;
+    public RectTransform DialogueFrame;
+
     //gamemanager
     protected GameManager() { } //constructor cannot be used - is null
-
-	//party of characters
-	public List<GameObject> Party;
 
     private Animator GameState; //The game state machine (see notes in header)
     private HashSet<string> ItemReceivedRecords = new HashSet<string>();
@@ -83,7 +91,43 @@ public class GameManager : Singleton<GameManager> {
         GameState = this.GetComponent<Animator>();
         base.Awake();
     }
+
+    private void Start()
+    {
+        Player.Instance.Party.Add(ResourceManager.Instance.GetCharacter("Ella"));
+        Player.Instance.Party.Add(ResourceManager.Instance.GetCharacter("Nikolai"));
+        Player.Instance.Party.Add(ResourceManager.Instance.GetCharacter("Nikolai's Twin"));
+        Player.Instance.Party.Add(ResourceManager.Instance.GetCharacter("Margarethe"));
+        //WorldCanvas.SetActive(false);
+    }
     
+    
+    private void Update()
+    {
+        if (!UIManager.IsPrinting) {
+            if (IsState(GameStates.IntroState) && Input.GetButtonDown("Submit") && index <= 12) {
+                if (index == 0) {
+                    Overall.GetComponentInChildren<Text>().text = "";
+                    DialogueFrame.sizeDelta = new Vector2(700, 70);
+                    SoundManager.Instance.SetMusic(ResourceManager.Instance.GetSound("WeddingSong"));
+                    IntroInteractable.Interact();
+                }
+                if (index == 7)
+                    SoundManager.Instance.SetMusic(ResourceManager.Instance.GetSound("BattleMusic"));
+                Overall.GetComponent<Image>().sprite = CutScenes[index];
+                index++;
+            }
+            else if (IsState(GameStates.IntroState) && Input.GetButtonDown("Submit") && index > 12) {
+                SoundManager.Instance.SetMusic(ResourceManager.Instance.GetSound("CastleMusic"));
+                Overall.SetActive(false);
+                SetState(GameStates.IdleState);
+                WorldCanvas.SetActive(true);
+                DialogueFrame.sizeDelta = new Vector2(700, 100);
+            }
+        }
+    }
+    
+
     /// <summary>
     /// This is the function to check whether the current game state
     /// is a certain game state from the "GameStates" enum.j

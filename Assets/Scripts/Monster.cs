@@ -11,9 +11,9 @@ using UnityEngine;
 
 public class Monster : MovingObject {
 
-	//[SerializeField]
-	public List<Stats> EnemyParty = new List<Stats> ();
-	public Canvas BattleCanvas;
+    //[SerializeField]
+    public List<Stats> EnemyParty = new List<Stats>();
+    public Canvas BattleCanvas;
 
     //public Stats MonsterStats;
     [Tooltip("Set whether this AI searches for the best path")]
@@ -36,6 +36,8 @@ public class Monster : MovingObject {
     private Transform MySpot;
     private AudioClip MonsterSound;
     private AudioSource MyAudioSource;
+
+    private bool waiting = false;
 
     /// <summary>
     /// Pauses the monster when the player flees to give him a chance to escape.
@@ -71,35 +73,46 @@ public class Monster : MovingObject {
         MySpot.gameObject.SetActive(false);
     }
 
+    IEnumerator wait()
+    {
+        yield return new WaitForSeconds(0.1f);
+        waiting = false;
+    }
+
     // Update is called once per frame
     void Update()
     {
-        if (!GameManager.Instance.IsState(GameStates.IdleState)) {
+        transform.rotation = Quaternion.Euler(0, 0, 0);
+        if (waiting)
+            return;
+        // This is for timing of turn-based movement with Player
+        /*if (!GameManager.Instance.IsState(GameStates.IdleState)) {
             if (!GameManager.Instance.IsState(GameStates.PlayerMovingState))
                 NextActionTime = Time.time;
-        }
-        else {
+        }*/
+        //else {
             if (!IAmMoving && MySpot.position != transform.position)
                 MySpot.position = transform.position;
-            if (!Paused) { //only move when game is in idle mode and monster is not paused from fleeing battle
-                if (Time.time > NextActionTime) { //see if it is time to move again
-                    NextActionTime += MoveRate; //set the next time to move
+            if (!Paused && (GameManager.Instance.IsState(GameStates.IdleState) ||
+                    GameManager.Instance.IsState(GameStates.PlayerMovingState))) { //only move when game is in idle mode and monster is not paused from fleeing battle
+            //    if (Time.time > NextActionTime) { //see if it is time to move again
+            //        NextActionTime += MoveRate; //set the next time to move
                     float sqr_magnitude = Vector3.SqrMagnitude(new Vector3((Target.position.x - transform.position.x), (Target.position.y - transform.position.y)));
-                    if (sqr_magnitude <= 1) {
-                        //BattleManager.Instance.Encounter(GetComponent<Stats>());
-						BattleCanvas.GetComponent<BattleManager>().Encounter(this);
-						//BattleManager.Instance.Encounter(this);
-						//OneVOneManager.Instance.Encounter(this);
-                    }
+                    if (sqr_magnitude <= 1.5) {
+                        //BattleManager.Instance.Encounter(this);
+                         BattleCanvas.GetComponent<BattleManager>().Encounter(this);
+            }
                     else if (sqr_magnitude <= (Radius * Radius) && !IAmMoving) {
                         if (!Pathfinding)
                             DetectPlayer();
                         else
                             DetectPlayerAStar();
                     }
-                }
+        //        }
             }
-        }
+        //}
+        waiting = true;
+        StartCoroutine(wait());
     }
 
     /// <summary>
@@ -122,7 +135,7 @@ public class Monster : MovingObject {
         {
             //start battle screen, get component of the battle game object, or maybe the game manager will handle this
             Debug.Log("Monster wants to battle!");
-            BattleManager.Instance.Encounter(EnemyParty);
+            BattleManager.Instance.Encounter(this.GetComponent<Stats>());
         }
     }
     */
@@ -194,10 +207,12 @@ public class Monster : MovingObject {
         endGridPosition = new MyPathNode(
             (int)(Target.transform.position.x-GridOrigin.x), (int)(Target.transform.position.y-GridOrigin.y), false);
         findUpdatedPath(currentGridPosition.x, currentGridPosition.y);
+        
         if (NextGridNode.x != currentGridPosition.x)
             x_dir = NextGridNode.x > currentGridPosition.x ? 1 : -1;
-        else if (NextGridNode.y != currentGridPosition.y)
+        if (NextGridNode.y != currentGridPosition.y)
             y_dir = NextGridNode.y > currentGridPosition.y ? 1 : -1;
+
         if (!MyAudioSource.isPlaying)
             SoundManager.Instance.RandomizeSfx(MonsterSound, MyAudioSource);
         AttemptMove<Player>(x_dir, y_dir);
